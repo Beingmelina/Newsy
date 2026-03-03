@@ -651,8 +651,8 @@ app.post('/api/feedback', async (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
-    hasAnthropicKey: !!process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY,
-    hasElevenLabs: !!process.env.REPLIT_CONNECTORS_HOSTNAME
+    hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
+    hasElevenLabs: !!process.env.ELEVENLABS_API_KEY
   });
 });
 
@@ -936,11 +936,11 @@ app.get('/api/live-poller-status', (req, res) => {
 
 const server = app.listen(PORT, '0.0.0.0', async () => {
   console.log(`Newsy server running on port ${PORT}`);
-  console.log(`Anthropic AI configured: ${!!process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY}`);
-  console.log(`ElevenLabs TTS configured: ${!!process.env.REPLIT_CONNECTORS_HOSTNAME}`);
+  console.log(`Anthropic AI configured: ${!!process.env.ANTHROPIC_API_KEY}`);
+  console.log(`ElevenLabs TTS configured: ${!!process.env.ELEVENLABS_API_KEY}`);
   console.log(`Database connected: ${!!process.env.DATABASE_URL}`);
   
-  await rescheduleAllNotifications();
+  try { await pool.query(`CREATE TABLE IF NOT EXISTS users (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), email TEXT UNIQUE, push_subscription JSONB, preferences JSONB, created_at TIMESTAMP DEFAULT NOW())`); await pool.query(`CREATE TABLE IF NOT EXISTS briefings (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID REFERENCES users(id), content TEXT, audio_url TEXT, created_at TIMESTAMP DEFAULT NOW())`); await pool.query(`CREATE TABLE IF NOT EXISTS scheduled_times (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID REFERENCES users(id), time TEXT, timezone TEXT, created_at TIMESTAMP DEFAULT NOW())`); await pool.query(`CREATE TABLE IF NOT EXISTS live_update_subscriptions (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID REFERENCES users(id), push_subscription JSONB, created_at TIMESTAMP DEFAULT NOW())`); console.log('Database tables ready'); } catch(e) { console.error('Table creation error:', e.message); } await rescheduleAllNotifications();
 
   startLivePoller(sendLiveUpdateToSubscribers);
 });
@@ -971,3 +971,4 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (reason) => {
   console.error('Unhandled promise rejection (server staying alive):', reason);
 });
+

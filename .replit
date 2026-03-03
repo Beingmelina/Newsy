@@ -1,0 +1,46 @@
+modules = ["nodejs-20", "postgresql-16", "python-3.11"]
+[nix]
+channel = "stable-25_05"
+packages = ["unzip"]
+
+[agent]
+expertMode = true
+integrations = ["javascript_openai:1.0.0", "javascript_anthropic_ai_integrations:2.0.0", "javascript_openai_ai_integrations:2.0.0", "elevenlabs:1.0.0"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Newsy Server"
+
+[[workflows.workflow]]
+name = "Newsy Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[deployment]
+deploymentTarget = "vm"
+run = ["node", "server.js"]
+
+[userenv]
+
+[userenv.shared]
+VAPID_PUBLIC_KEY = "BLxY7ZkiqrIOKl8AOgOvAd_fpEXdKWSKbHde8wDMywOafZO6Ydyz9RE4jddHQ19fLndrS-amtH-hEFnBVY1BBrk"
+VAPID_PRIVATE_KEY = "mUWQ5q_ZA4R1zLqDr23163XWgVAFijWUETqrPgLRMdI"

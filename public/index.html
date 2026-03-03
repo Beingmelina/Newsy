@@ -1,0 +1,2657 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>NEWSY</title>
+  
+  <!-- iOS Web App support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="NEWSY">
+  <link rel="apple-touch-icon" href="/icon-512.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#ffffff">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+
+  <style>
+    .home-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      width: 32px;
+      height: 32px;
+      z-index: 1000;
+    }
+    .home-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--text);
+      stroke-width: 1.5;
+      fill: none;
+    }
+    @font-face{
+      font-family: "Washington";
+      src: url("Washington.woff2") format("woff2");
+      font-display: swap;
+    }
+
+    :root{
+      --bg: #ffffff;
+      --text: #000000;
+      --muted: #222222;
+      --border: #000000;
+      --card: #ffffff;
+      --btn: #000000;
+      --btnText: #ffffff;
+      --btnAltBg: #ffffff;
+      --btnAltText: #000000;
+      --radius: 0px;
+      --pad: 28px;
+      --gap: 16px;
+      --boxGap: 14px;
+      --stroke: 3px;
+      --strokeThin: 2px;
+      --max: 900px;
+    }
+
+    *{ box-sizing: border-box; }
+    html{ height: 100%; }
+
+    body{
+      margin: 0;
+      height: 100dvh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+      overflow: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .frame{
+      width: min(var(--max), calc(100% - 24px));
+      height: calc(100dvh - 48px);
+      max-height: calc(100dvh - 48px);
+      border: var(--stroke) solid var(--border);
+      padding: 40px 48px;
+      background: var(--card);
+      position: relative;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: #000 transparent;
+    }
+    .frame::-webkit-scrollbar{
+      width: 4px;
+    }
+    .frame::-webkit-scrollbar-track{
+      background: transparent;
+    }
+    .frame::-webkit-scrollbar-thumb{
+      background: #000;
+      border-radius: 2px;
+    }
+    
+    .frame.noScroll{
+      height: 100dvh;
+      max-height: 100vh;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .frame section{
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
+    .frame section .logo{
+      flex-shrink: 0;
+    }
+
+    #s1b {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    #s1b .contentCenter {
+      flex: 0;
+    }
+
+    .frame section .briefingMeta,
+    .frame section .subtitle{
+      flex-shrink: 0;
+    }
+
+    .contentCenter{
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      width: 100%;
+    }
+    
+    .contentCenter .btn{
+      width: 100%;
+      max-width: 280px;
+    }
+
+    .logo{
+      font-family: "Washington", Georgia, "Times New Roman", serif;
+      font-weight: 400;
+      font-size: clamp(52px, 5vw, 84px);
+      line-height: 1;
+      margin: 0 0 18px 0;
+      letter-spacing: 0.2px;
+      text-align: center;
+    }
+
+    .title{
+      font-size: clamp(28px, 3vw, 40px);
+      line-height: 1.2;
+      margin: 0 0 10px 0;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .subtitle{
+      margin: 0 0 28px 0;
+      font-size: 20px;
+      color: var(--muted);
+      font-weight: 400;
+      text-align: center;
+    }
+
+    .instruction{
+      margin: 0 0 22px 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .sectionLabel{
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--muted);
+      margin: 0 0 8px 0;
+      text-align: center;
+    }
+
+    .audioProgress{
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+
+    .voiceHint{
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text);
+      margin: 0 0 12px 0;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse{
+      0%, 100%{ opacity: 1; }
+      50%{ opacity: 0.5; }
+    }
+
+    .listeningIndicator{
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      background: #e74c3c;
+      border-radius: 50%;
+      margin-right: 8px;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink{
+      0%, 100%{ opacity: 1; }
+      50%{ opacity: 0.3; }
+    }
+
+    .stack{ display: grid; gap: 18px; min-width: 0; }
+
+    .fieldLabel{
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+    }
+
+    input[type="text"], input[type="email"]{
+      width: 100%;
+      border: var(--strokeThin) solid var(--border);
+      padding: 18px 16px;
+      font-size: 18px;
+      outline: none;
+      background: #fff;
+      font-family: inherit;
+    }
+
+    .options{ display: grid; gap: 14px; overflow-y: auto; flex: 1; min-height: 0; }
+
+    .opt{
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      align-items: center;
+      gap: 14px;
+      border: var(--strokeThin) solid var(--border);
+      padding: 18px 18px;
+      font-size: 18px;
+      user-select: none;
+      cursor: pointer;
+    }
+
+    .opt input{
+      width: 18px;
+      height: 18px;
+      accent-color: #000;
+    }
+
+    .row{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 28px;
+      flex-shrink: 0;
+    }
+
+    .btn{
+      width: 100%;
+      border: var(--strokeThin) solid var(--border);
+      padding: 18px 18px;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .btnPrimary{
+      background: var(--btn);
+      color: var(--btnText);
+      border-color: var(--border);
+    }
+
+    .btnAlt{
+      background: var(--btnAltBg);
+      color: var(--btnAltText);
+    }
+
+    .btnFull{
+      width: 100%;
+      margin-top: 26px;
+    }
+
+    .note{
+      margin-top: 22px;
+      font-size: 16px;
+      color: var(--muted);
+    }
+
+    .hidden{ display: none !important; }
+
+    .segRow{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      max-width: 100%;
+    }
+
+    .seg{
+      border: var(--strokeThin) solid var(--border);
+      padding: 18px;
+      cursor: pointer;
+      font-weight: 700;
+      text-align: center;
+      font-size: 18px;
+      background: #fff;
+      min-width: 0;
+    }
+
+    .seg.active{
+      background: #000;
+      color: #fff;
+    }
+
+    .timeBox{
+      border: var(--strokeThin) solid var(--border);
+      padding: 18px;
+      display: grid;
+      gap: 10px;
+      max-width: 100%;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .timeLabel{
+      font-weight: 700;
+      font-size: 18px;
+      margin: 0;
+    }
+
+    select, input[type="time"]{
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      border: var(--strokeThin) solid var(--border);
+      padding: 16px;
+      font-size: 18px;
+      font-family: inherit;
+      background: #fff;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    .briefingBox{
+      margin-top: 18px;
+      font-size: 18px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+    
+    .briefingBox.loading{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: #ffffff;
+      color: #000000;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 24px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 500;
+      margin: 60px auto;
+      width: fit-content;
+    }
+    
+    .briefingBox.loading::before{
+      content: '';
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(0,0,0,0.2);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      flex-shrink: 0;
+    }
+    
+    @keyframes spin{
+      to{ transform: rotate(360deg); }
+    }
+
+    .pillRow{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .pill{
+      border: var(--strokeThin) solid var(--border);
+      padding: 10px 12px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #fff;
+      font-size: 16px;
+    }
+
+    .pill.active{
+      background: #000;
+      color: #fff;
+    }
+
+    .settingsBtn{
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      width: 32px;
+      height: 32px;
+    }
+    .settingsBtn svg{
+      width: 20px;
+      height: 20px;
+      stroke: var(--text);
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .greeting{
+      font-size: 28px;
+      font-weight: 600;
+      text-align: center;
+      margin: 0 0 12px 0;
+    }
+
+    .briefingMeta{
+      font-size: 14px;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 18px;
+      font-weight: 500;
+    }
+
+    .radioGroup{
+      display: grid;
+      gap: 12px;
+    }
+
+    .radioOpt{
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      align-items: center;
+      gap: 14px;
+      border: var(--strokeThin) solid var(--border);
+      padding: 16px 18px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .radioOpt input{
+      width: 18px;
+      height: 18px;
+      accent-color: #000;
+    }
+
+    .radioOpt.active{
+      background: #f5f5f5;
+    }
+
+    .sectionDivider{
+      border-top: 1px solid #ddd;
+      margin: 24px 0;
+    }
+
+    @media (max-width: 700px){
+      .frame{
+        padding: 24px 20px;
+        width: calc(100% - 16px);
+        height: calc(100dvh - 16px);
+        max-height: calc(100dvh - 16px);
+        margin: 8px;
+      }
+      .row{ grid-template-columns: 1fr; }
+      .segRow{ grid-template-columns: 1fr; }
+      .settingsBtn{ top: 10px; right: 10px; }
+      .home-btn{ top: 10px; left: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame" id="app">
+    <button class="home-btn" id="btnHome" title="Home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    </button>
+
+    <!-- Screen 1: Welcome (new users) -->
+    <section id="s1">
+      <div class="contentCenter">
+        <h1 class="logo">Newsy</h1>
+        <p class="subtitle">Your curated audio briefing.</p>
+        <button class="btn btnPrimary btnFull" id="btnStart">Get started</button>
+      </div>
+    </section>
+
+    <!-- Screen 1b: Home (returning users) -->
+    <section id="s1b" class="hidden">
+      <button class="settingsBtn" id="btnSettings" title="Settings"><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
+      <h1 class="logo">Newsy</h1>
+      <div class="contentCenter">
+        <p class="greeting" id="greetingText">Hello!</p>
+        <p class="subtitle">Would you like a news briefing?</p>
+        <button class="btn btnPrimary btnFull" id="btnGetBriefing">Yes, brief me</button>
+      </div>
+    </section>
+
+    <!-- Screen 2: Name/Email -->
+    <section id="s2" class="hidden">
+      <h1 class="logo">Newsy</h1>
+      <p class="instruction">Let's curate your briefing.</p>
+
+      <div class="stack">
+        <div>
+          <p class="fieldLabel">Name</p>
+          <input id="name" type="text" placeholder="Your name" autocomplete="name" />
+        </div>
+
+        <div>
+          <p class="fieldLabel">Email</p>
+          <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn btnPrimary" id="btnS2">Next</button>
+        <button class="btn btnAlt" id="btnS2Back">Back</button>
+      </div>
+    </section>
+
+    <!-- Screen 4: Topics -->
+    <section id="s4" class="hidden">
+      <h1 class="logo">Newsy</h1>
+      <p class="instruction">Select your topics.</p>
+
+      <div class="options" id="topicList"></div>
+
+      <div class="row">
+        <button class="btn btnPrimary" id="btnS4">Next</button>
+        <button class="btn btnAlt" id="btnS4Back">Back</button>
+      </div>
+    </section>
+
+    <!-- Screen 5: Regions -->
+    <section id="s5" class="hidden">
+      <h1 class="logo">Newsy</h1>
+      <p class="instruction">Select your regions.</p>
+
+      <div class="options" id="regionList"></div>
+
+      <div class="row">
+        <button class="btn btnPrimary" id="btnS5">Next</button>
+        <button class="btn btnAlt" id="btnS5Back">Back</button>
+      </div>
+    </section>
+
+    <!-- Screen 6: Voice Preferences -->
+    <section id="s6" class="hidden">
+      <h1 class="logo">Newsy</h1>
+      <p class="instruction">Choose your news reader voice.</p>
+
+      <p class="fieldLabel">Voice Gender</p>
+      <div class="radioGroup" id="genderGroup">
+        <label class="radioOpt">
+          <input type="radio" name="voiceGender" value="male" checked />
+          <span>Male</span>
+        </label>
+        <label class="radioOpt">
+          <input type="radio" name="voiceGender" value="female" />
+          <span>Female</span>
+        </label>
+      </div>
+
+      <div class="sectionDivider"></div>
+
+      <p class="fieldLabel">Accent</p>
+      <div class="radioGroup" id="accentGroup">
+        <label class="radioOpt">
+          <input type="radio" name="voiceAccent" value="american" />
+          <span>American</span>
+        </label>
+        <label class="radioOpt">
+          <input type="radio" name="voiceAccent" value="british" checked />
+          <span>British</span>
+        </label>
+      </div>
+
+      <div class="row">
+        <button class="btn btnPrimary" id="btnS6">Next</button>
+        <button class="btn btnAlt" id="btnS6Back">Back</button>
+      </div>
+    </section>
+
+    <section id="s6b" class="hidden">
+      <h1 class="logo">Newsy</h1>
+      <p class="instruction">How long do you want your briefing to be?</p>
+
+      <div class="stack">
+        <div class="seg active" data-length="short" role="button" tabindex="0" style="text-align: left; padding: 16px 18px;">Short briefing. <span style="color:#666; font-weight:400;">(3-5 minutes)</span></div>
+        <div class="seg" data-length="long" role="button" tabindex="0" style="text-align: left; padding: 16px 18px;">Full briefing. <span style="color:#666; font-weight:400;">(5-7 minutes)</span></div>
+      </div>
+
+      <div class="row">
+        <button class="btn btnPrimary" id="btnS6b">Next</button>
+        <button class="btn btnAlt" id="btnS6bBack">Back</button>
+      </div>
+    </section>
+
+    <!-- Screen 7: Schedule -->
+    <section id="s7" class="hidden">
+      <h1 class="logo">Newsy</h1>
+      <p class="instruction">How many briefings would you like per day?</p>
+
+      <div class="segRow" style="grid-template-columns: repeat(2, 1fr);">
+        <div class="seg active" data-count="1" role="button" tabindex="0">1</div>
+        <div class="seg" data-count="2" role="button" tabindex="0">2</div>
+      </div>
+
+      <div class="stack" style="margin-top: 18px;" id="scheduleTimesContainer">
+        <div class="timeBox">
+          <p class="timeLabel">Briefing 1</p>
+          <select id="scheduleTime1"></select>
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn btnPrimary" id="btnS7">Finish setup</button>
+        <button class="btn btnAlt" id="btnS7Back">Back</button>
+      </div>
+    </section>
+
+    <!-- Screen 7b: Live Updates (onboarding) -->
+    <section id="s7b" class="hidden">
+      <h1 class="logo">Newsy</h1>
+      <p class="instruction" style="font-weight: bold;">Would you like to receive live updates on breaking news in the Middle East?</p>
+      <p class="instruction" style="font-size: 14px; color: #555;">You'll get push notifications when major events happen.</p>
+      <div class="row" style="margin-top: 20px;">
+        <button class="btn btnPrimary" id="btnOnboardLiveYes">Yes</button>
+        <button class="btn btnAlt" id="btnOnboardLiveNo">No thanks</button>
+      </div>
+    </section>
+
+    <!-- Screen 8: Setup Complete -->
+    <section id="s8" class="hidden" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height: 80vh;">
+      <h1 class="logo">Newsy</h1>
+      <button class="btn btnPrimary" id="btnListenNow" style="padding: 16px 40px; font-size: 18px;">Generate my first briefing</button>
+    </section>
+
+    <!-- Screen 9: Briefing -->
+    <section id="s9" class="hidden">
+      <button class="settingsBtn" id="btnSettingsBriefing" title="Settings"><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
+      <h1 class="logo">Newsy</h1>
+      <p class="briefingMeta" id="briefingMeta"></p>
+      <p class="instruction" id="briefingInstruction">Your briefing</p>
+
+      <div class="briefingBox" id="briefingText"></div>
+
+      <button class="btn btnPrimary btnFull" id="btnPlay" style="margin-top: 18px;">Play briefing</button>
+
+      <div id="deepDiveSection" class="hidden">
+        <p class="instruction" style="margin-top: 26px; font-weight: bold;">Would you like to deep dive into any of these topics?</p>
+
+        <div class="pillRow" id="deepDivePills"></div>
+
+        <div class="row" style="margin-top: 18px;">
+          <button class="btn btnAlt" id="btnNoDive">No, thank you</button>
+          <button class="btn btnPrimary" id="btnDive">Deep dive</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 10: Deep Dive output -->
+    <section id="s10" class="hidden">
+      <h1 class="logo">Newsy</h1>
+      <p class="instruction">Deep dive</p>
+
+      <div class="briefingBox" id="deepDiveText"></div>
+
+      <button class="btn btnPrimary btnFull" id="btnPlayDive">Play deep dive</button>
+      <button class="btn btnAlt btnFull" id="btnGoDeeper" style="margin-top: 18px;">Go deeper</button>
+      <button class="btn btnAlt btnFull" id="btnBackToBriefing" style="margin-top: 18px;">Back</button>
+    </section>
+
+    <section id="sLiveAlert" class="hidden">
+      <h1 class="logo">Newsy</h1>
+      <p class="briefingMeta" id="liveAlertMeta"></p>
+      <p class="instruction" style="font-weight: bold;">Live Update</p>
+
+      <div class="briefingBox" id="liveAlertText"></div>
+
+      <button class="btn btnPrimary btnFull" id="btnPlayLiveAlert" style="margin-top: 18px;">Play audio</button>
+      <button class="btn btnAlt btnFull" id="btnLiveAlertHome" style="margin-top: 12px;">Back to Home</button>
+    </section>
+
+    <!-- Live Updates: Enable Notifications Screen -->
+    <section id="sLiveEnable" class="hidden" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height: 80vh;">
+      <p style="font-size: 18px; text-align: center; margin-bottom: 30px; max-width: 300px;">Please enable notifications in order to receive live updates.</p>
+      <button class="btn btnPrimary" id="btnLiveEnablePush" style="padding: 16px 32px; font-size: 16px;">Enable push notifications</button>
+    </section>
+
+    <!-- Live Updates Confirmed Screen -->
+    <section id="sLiveConfirm" class="hidden" style="display:flex; align-items:center; justify-content:center; min-height: 80vh;">
+      <div style="background: #000; color: #fff; padding: 30px 40px; text-align: center; font-size: 20px; font-weight: 500; letter-spacing: 0.5px;">
+        Live updates activated.
+      </div>
+    </section>
+
+    <!-- Screen 11: Settings -->
+    <section id="s11" class="hidden">
+      <h1 class="logo">Newsy</h1>
+
+      <div class="stack">
+        <button class="btn btnAlt" id="btnEditTopics">Edit Topics</button>
+        <button class="btn btnAlt" id="btnEditRegions">Edit Regions</button>
+        <button class="btn btnAlt" id="btnEditVoice">Edit Voice Preferences</button>
+        <button class="btn btnAlt" id="btnEditLength">Edit Briefing Length</button>
+        <button class="btn btnAlt" id="btnEditSchedule">Edit Schedule</button>
+        <button class="btn btnAlt" id="btnEditLiveUpdates">Edit Live Updates</button>
+        <button class="btn btnAlt" id="btnFeedback">Send Feedback</button>
+      </div>
+
+      <button class="btn btnPrimary btnFull" id="btnBackToBriefingFromSettings">Back to Briefing</button>
+      <button class="btn btnPrimary btnFull" id="btnSettingsBack" style="margin-top: 12px;">Back to Home</button>
+      <button class="btn btnAlt btnFull" id="btnLogout" style="margin-top: 12px;">Log out</button>
+    </section>
+
+    <!-- Settings sub-screens -->
+    <section id="sEditTopics" class="hidden">
+      <h1 class="logo">Newsy</h1>
+      <p class="instruction">Edit Topics</p>
+      <div class="options" id="topicListEdit"></div>
+      <button class="btn btnPrimary btnFull" id="btnSaveTopics">Save</button>
+    </section>
+
+    <section id="sEditRegions" class="hidden">
+      <h1 class="logo">Newsy</h1>
+      <p class="instruction">Edit Regions</p>
+      <div class="options" id="regionListEdit"></div>
+      <button class="btn btnPrimary btnFull" id="btnSaveRegions">Save</button>
+    </section>
+
+    <section id="sEditVoice" class="hidden">
+      <h1 class="logo">Newsy</h1>
+      <p class="instruction">Edit Voice Preferences</p>
+
+      <p class="fieldLabel">Voice Gender</p>
+      <div class="radioGroup" id="genderGroupEdit">
+        <label class="radioOpt">
+          <input type="radio" name="voiceGenderEdit" value="male" />
+          <span>Male</span>
+        </label>
+        <label class="radioOpt">
+          <input type="radio" name="voiceGenderEdit" value="female" />
+          <span>Female</span>
+        </label>
+      </div>
+
+      <div class="sectionDivider"></div>
+
+      <p class="fieldLabel">Accent</p>
+      <div class="radioGroup" id="accentGroupEdit">
+        <label class="radioOpt">
+          <input type="radio" name="voiceAccentEdit" value="american" />
+          <span>American</span>
+        </label>
+        <label class="radioOpt">
+          <input type="radio" name="voiceAccentEdit" value="british" />
+          <span>British</span>
+        </label>
+      </div>
+
+      <button class="btn btnPrimary btnFull" id="btnSaveVoice">Save</button>
+    </section>
+
+    <section id="sEditLength" class="hidden">
+      <h1 class="logo">Newsy</h1>
+      <p class="instruction">Edit Briefing Length</p>
+
+      <div class="stack">
+        <div class="seg" data-length="short" role="button" tabindex="0" style="text-align: left; padding: 16px 18px;">Short briefing. <span style="color:#666; font-weight:400;">(3-5 minutes)</span></div>
+        <div class="seg" data-length="long" role="button" tabindex="0" style="text-align: left; padding: 16px 18px;">Full briefing. <span style="color:#666; font-weight:400;">(5-7 minutes)</span></div>
+      </div>
+
+      <button class="btn btnPrimary btnFull" id="btnSaveLength">Save</button>
+    </section>
+
+    <section id="sEditSchedule" class="hidden">
+      <h1 class="logo">Newsy</h1>
+      <p class="instruction">Edit Schedule</p>
+
+      <div class="segRow" style="grid-template-columns: repeat(2, 1fr);" id="scheduleSegRowEdit">
+        <div class="seg" data-count="1" role="button" tabindex="0">1</div>
+        <div class="seg" data-count="2" role="button" tabindex="0">2</div>
+      </div>
+
+      <div class="stack" style="margin-top: 18px;" id="scheduleTimesContainerEdit">
+      </div>
+
+      <button class="btn btnPrimary btnFull" id="btnSaveSchedule">Save</button>
+    </section>
+
+    <section id="sEditLiveUpdates" class="hidden">
+      <h1 class="logo">Newsy</h1>
+      <p class="instruction">Edit Live Updates</p>
+
+      <p class="instruction" style="font-weight: bold; margin-top: 18px;">Would you like to receive live updates on the current escalations in the Middle East?</p>
+
+      <div id="liveUpdatesEditStatus" class="hidden" style="margin-top: 14px;">
+        <p class="instruction" style="color: #333;">Live updates are currently active.</p>
+      </div>
+
+      <div class="row" id="liveUpdatesEditBtns" style="margin-top: 18px;">
+        <button class="btn btnPrimary" id="btnEditLiveYes">Yes</button>
+        <button class="btn btnAlt" id="btnEditLiveNo">No</button>
+      </div>
+
+      <button class="btn btnAlt btnFull" id="btnEditLiveBack" style="margin-top: 18px;">Back</button>
+    </section>
+
+    <section id="sFeedback" class="hidden">
+      <h1 class="logo">Newsy</h1>
+      <p class="instruction">Send Feedback</p>
+      <p class="instruction" style="font-size: 16px; color: #666;">We'd love to hear from you. Share your thoughts, suggestions, or report any issues.</p>
+      <textarea id="feedbackText" placeholder="Write your feedback here..." style="width: 100%; min-height: 150px; border: 2px solid #000; padding: 16px; font-size: 16px; font-family: inherit; box-sizing: border-box; resize: vertical; outline: none;"></textarea>
+      <button class="btn btnPrimary btnFull" id="btnSubmitFeedback" style="margin-top: 18px;">Submit</button>
+      <button class="btn btnAlt btnFull" id="btnFeedbackBack" style="margin-top: 12px;">Back</button>
+    </section>
+
+  </div>
+
+  <script>
+    const OUTLETS = [
+      "BBC", "Al Jazeera", "The Guardian", "NPR",
+      "Financial Times", "Bloomberg", "CNBC",
+      "TechCrunch", "Wired", "Ars Technica",
+      "South China Morning Post", "RT",
+      "The National (UAE)", "Middle East Monitor", "France 24 Arabic", "An-Nahar (Lebanon)",
+      "ESPN", "Variety"
+    ];
+
+    const DEFAULT_OUTLETS = new Set(OUTLETS);
+
+    const TOPICS = [
+      "Politics/Geopolitics", "Business/Markets", "Tech/AI",
+      "Health/Longevity", "Arts/Culture", "Sports", "Entertainment"
+    ];
+
+    const DEFAULT_TOPICS = new Set([
+      "Politics/Geopolitics", "Business/Markets", "Tech/AI", "Health/Longevity"
+    ]);
+
+    const REGIONS = ["Global", "Middle East", "Europe", "US/Canada", "Asia"];
+    const DEFAULT_REGIONS = new Set(["Global", "Middle East"]);
+
+    const STORAGE_KEY = "newsy_mvp_settings_v2";
+    const UUID_COOKIE = "newsy_uid";
+
+    const state = {
+      uuid: "",
+      name: "",
+      email: "",
+      outlets: new Set(),
+      topics: new Set(),
+      regions: new Set(),
+      voiceGender: "male",
+      voiceAccent: "british",
+      briefingLength: "short",
+      briefingsPerDay: 1,
+      briefingTimes: ["08:00", "12:00", "17:00", "20:00"],
+      lastBriefingText: "",
+      briefingSections: [],
+      currentSectionIndex: 0,
+      deepDiveSelection: new Set(),
+      currentDeepDiveTopic: "",
+      currentDeepDiveText: "",
+      otherPublication: "",
+      isRegistered: false,
+      liveUpdatesSubscribed: false,
+      liveUpdatesDeclined: false
+    };
+
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+      return match ? decodeURIComponent(match[1]) : null;
+    }
+
+    function setCookie(name, value) {
+      const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
+      document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+    }
+
+    async function getOrCreateUUID() {
+      let uuid = getCookie(UUID_COOKIE);
+      if (uuid) return uuid;
+      try {
+        const res = await fetch('/api/generate-uuid');
+        const data = await res.json();
+        uuid = data.uuid;
+      } catch (e) {
+        uuid = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
+      }
+      setCookie(UUID_COOKIE, uuid);
+      return uuid;
+    }
+
+    function saveStateLocal() {
+      const payload = {
+        uuid: state.uuid,
+        name: state.name,
+        email: state.email,
+        outlets: Array.from(state.outlets),
+        topics: Array.from(state.topics),
+        regions: Array.from(state.regions),
+        voiceGender: state.voiceGender,
+        voiceAccent: state.voiceAccent,
+        briefingLength: state.briefingLength,
+        briefingsPerDay: state.briefingsPerDay,
+        briefingTimes: state.briefingTimes,
+        otherPublication: state.otherPublication,
+        isRegistered: state.isRegistered,
+        liveUpdatesSubscribed: state.liveUpdatesSubscribed
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    }
+
+    function saveState() {
+      saveStateLocal();
+      if (state.uuid && state.isRegistered) {
+        fetch(`/api/user-state/${state.uuid}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: state.name,
+            email: state.email,
+            outlets: Array.from(state.outlets),
+            topics: Array.from(state.topics),
+            regions: Array.from(state.regions),
+            voiceGender: state.voiceGender,
+            voiceAccent: state.voiceAccent,
+            briefingLength: state.briefingLength,
+            briefingsPerDay: state.briefingsPerDay,
+            briefingTimes: state.briefingTimes
+          })
+        }).catch(err => console.error('Server sync failed:', err));
+      }
+    }
+
+    function applyStateFromData(p) {
+      state.name = p.name || "";
+      state.email = p.email || "";
+      state.outlets = new Set(Array.isArray(p.outlets) ? p.outlets : Array.from(DEFAULT_OUTLETS));
+      state.topics = new Set(Array.isArray(p.topics) ? p.topics : Array.from(DEFAULT_TOPICS));
+      state.regions = new Set(Array.isArray(p.regions) ? p.regions : Array.from(DEFAULT_REGIONS));
+      state.voiceGender = p.voiceGender || "male";
+      state.voiceAccent = p.voiceAccent || "british";
+      state.briefingLength = p.briefingLength || "short";
+      state.briefingsPerDay = Math.min(4, Math.max(1, p.briefingsPerDay || 1));
+      state.briefingTimes = Array.isArray(p.briefingTimes) ? p.briefingTimes : ["08:00", "12:00", "17:00", "20:00"];
+      state.otherPublication = p.otherPublication || "";
+      state.isRegistered = p.isRegistered || false;
+      state.liveUpdatesSubscribed = p.liveUpdatesSubscribed || false;
+      state.liveUpdatesDeclined = p.liveUpdatesDeclined || false;
+    }
+
+    async function loadState() {
+      state.uuid = await getOrCreateUUID();
+
+      let serverFound = false;
+      try {
+        const res = await fetch(`/api/user-state/${state.uuid}`);
+        if (res.ok) {
+          const data = await res.json();
+          applyStateFromData(data.state);
+          serverFound = true;
+        }
+      } catch (e) {
+        console.log('Server state fetch failed, using local cache');
+      }
+
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const p = JSON.parse(raw);
+          if (p.uuid && p.uuid !== state.uuid) {
+            state.uuid = p.uuid;
+            setCookie(UUID_COOKIE, state.uuid);
+          }
+          if (!serverFound) {
+            applyStateFromData(p);
+          } else {
+            if (!state.name && p.name) state.name = p.name;
+            if (!state.email && p.email) state.email = p.email;
+          }
+        }
+      } catch (e) {}
+
+      state.pushUserId = state.uuid;
+
+      if (state.isRegistered) {
+        saveState();
+      }
+      saveStateLocal();
+      return state.isRegistered;
+    }
+
+    const screens = [
+      "s1","s1b","s2","s4","s5","s6","s6b","s7","s7b","s8","s9","s10","s11",
+      "sLiveAlert","sLiveEnable","sLiveConfirm","sEditTopics","sEditRegions","sEditVoice","sEditLength","sEditSchedule","sEditLiveUpdates","sFeedback"
+    ].reduce((acc,id)=>{
+      acc[id] = document.getElementById(id);
+      return acc;
+    }, {});
+
+    function show(id){
+      Object.keys(screens).forEach(k => screens[k].classList.add("hidden"));
+      screens[id].classList.remove("hidden");
+      
+      const fixedScreens = ['s1', 's1b'];
+      const app = document.getElementById('app');
+      if (fixedScreens.includes(id)) {
+        app.classList.add('noScroll');
+      } else {
+        app.classList.remove('noScroll');
+      }
+      window.scrollTo(0, 0);
+      app.scrollTop = 0;
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    }
+
+    function makeCheckboxRow(label, checked, onChange){
+      const wrap = document.createElement("label");
+      wrap.className = "opt";
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = checked;
+      cb.addEventListener("change", () => onChange(cb.checked));
+      const text = document.createElement("div");
+      text.textContent = label;
+      wrap.appendChild(cb);
+      wrap.appendChild(text);
+      return wrap;
+    }
+
+    function renderOutlets(containerId = "outletList"){
+      const el = document.getElementById(containerId);
+      el.innerHTML = "";
+      OUTLETS.forEach(o=>{
+        el.appendChild(makeCheckboxRow(o, state.outlets.has(o), (isOn)=>{
+          if(isOn) state.outlets.add(o); else state.outlets.delete(o);
+          saveState();
+        }));
+      });
+    }
+
+    function renderTopics(containerId = "topicList"){
+      const el = document.getElementById(containerId);
+      el.innerHTML = "";
+      TOPICS.forEach(t=>{
+        el.appendChild(makeCheckboxRow(t, state.topics.has(t), (isOn)=>{
+          if(isOn) state.topics.add(t); else state.topics.delete(t);
+          saveState();
+        }));
+      });
+    }
+
+    function renderRegions(containerId = "regionList"){
+      const el = document.getElementById(containerId);
+      el.innerHTML = "";
+      REGIONS.forEach(r=>{
+        el.appendChild(makeCheckboxRow(r, state.regions.has(r), (isOn)=>{
+          if(isOn) state.regions.add(r); else state.regions.delete(r);
+          saveState();
+        }));
+      });
+    }
+
+    function buildTimes(selectEl, value){
+      selectEl.innerHTML = "";
+      for(let h=0; h<24; h++){
+        for(let m=0; m<60; m+=15){
+          const hh = String(h).padStart(2,"0");
+          const mm = String(m).padStart(2,"0");
+          const v = `${hh}:${mm}`;
+          const opt = document.createElement("option");
+          opt.value = v;
+          opt.textContent = v;
+          if(v === value) opt.selected = true;
+          selectEl.appendChild(opt);
+        }
+      }
+    }
+
+    function updateLengthSelection(screenId) {
+      const section = document.getElementById(screenId);
+      section.querySelectorAll('.seg[data-length]').forEach(s => {
+        s.classList.toggle('active', s.dataset.length === state.briefingLength);
+      });
+    }
+
+    function updateVoiceRadios(genderGroupId, accentGroupId){
+      document.querySelectorAll(`#${genderGroupId} input[name$="Gender"], #${genderGroupId} input[name$="GenderEdit"]`).forEach(r => {
+        if(r.value === state.voiceGender) r.checked = true;
+      });
+      document.querySelectorAll(`#${accentGroupId} input[name$="Accent"], #${accentGroupId} input[name$="AccentEdit"]`).forEach(r => {
+        if(r.value === state.voiceAccent) r.checked = true;
+      });
+    }
+
+    function getBriefingTimestamp(){
+      const now = new Date();
+      const options = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZoneName: 'short'
+      };
+      return now.toLocaleDateString('en-US', options);
+    }
+
+    function getVoiceSettings(){
+      let voice = 'ash';
+      if(state.voiceGender === 'male'){
+        voice = 'ash';
+      } else {
+        voice = 'coral';
+      }
+      return { voice, accent: state.voiceAccent };
+    }
+
+    function splitTextIntoSections(text) {
+      const headers = ['TOP GLOBAL NEWS', 'HARD NEWS', 'PERSPECTIVE SPLIT', 'MARKETS', 'MARKETS & TECH', 'ROUNDUP', 'KICKER', 'CLOSING'];
+      const pattern = new RegExp(`(${headers.join('|')})`, 'gi');
+      const parts = text.split(pattern).filter(p => p.trim().length > 0);
+      
+      const sections = [];
+      let currentId = 'opening';
+      let currentText = '';
+      
+      for (const part of parts) {
+        const upperPart = part.trim().toUpperCase();
+        if (headers.includes(upperPart)) {
+          if (currentText.trim().length > 0) {
+            sections.push({ id: currentId, title: currentId, text: currentText.trim() });
+          }
+          if (upperPart === 'TOP GLOBAL NEWS') currentId = 'topStory';
+          else if (upperPart === 'HARD NEWS') currentId = 'hardNews';
+          else if (upperPart === 'PERSPECTIVE SPLIT') currentId = 'perspectiveSplit';
+          else if (upperPart.startsWith('MARKETS')) currentId = 'marketsTech';
+          else if (upperPart === 'ROUNDUP') currentId = 'roundup';
+          else if (upperPart === 'KICKER') currentId = 'kicker';
+          else if (upperPart === 'CLOSING') currentId = 'closing';
+          currentText = part + '\n';
+        } else {
+          currentText += part;
+        }
+      }
+      if (currentText.trim().length > 0) {
+        sections.push({ id: currentId, title: currentId, text: currentText.trim() });
+      }
+      
+      if (sections.length < 3) {
+        const third = Math.ceil(text.length / 3);
+        return [
+          { id: 'chunk1', title: 'Part 1', text: text.slice(0, third) },
+          { id: 'chunk2', title: 'Part 2', text: text.slice(third, third * 2) },
+          { id: 'chunk3', title: 'Part 3', text: text.slice(third * 2) }
+        ];
+      }
+      
+      return sections;
+    }
+
+    async function generateBriefing(){
+      const { voice, accent } = getVoiceSettings();
+      const prefs = {
+        topics: Array.from(state.topics),
+        regions: Array.from(state.regions),
+        outlets: Array.from(state.outlets),
+        otherPublication: state.otherPublication,
+        userId: state.uuid,
+        voice,
+        accent,
+        briefingLength: state.briefingLength
+      };
+
+      const briefingTextEl = document.getElementById('briefingText');
+      
+      return new Promise((resolve, reject) => {
+        let fullText = '';
+        let firstTextReceived = false;
+        
+        fetch('/api/briefing-stream', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(prefs)
+        }).then(response => {
+          if (!response.ok) {
+            reject(new Error('Failed to generate briefing'));
+            return;
+          }
+          
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          
+          function processStream() {
+            reader.read().then(({ done, value }) => {
+              if (done) {
+                if (fullText.length > 0) {
+                  const topics = extractTopicsFromText(fullText);
+                  const displayText = stripDeepDiveLine(fullText);
+                  briefingTextEl.textContent = displayText;
+                  const parsedSections = splitTextIntoSections(displayText);
+                  resolve({ 
+                    success: true, 
+                    briefing: displayText,
+                    sections: parsedSections,
+                    topics: topics
+                  });
+                } else {
+                  reject(new Error('No briefing content received'));
+                }
+                return;
+              }
+              
+              const chunk = decoder.decode(value, { stream: true });
+              const lines = chunk.split('\n');
+              
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  try {
+                    const data = JSON.parse(line.slice(6));
+                    if (data.type === 'text') {
+                      if (!firstTextReceived) {
+                        firstTextReceived = true;
+                        stopCountdown();
+                        briefingTextEl.classList.remove('loading');
+                      }
+                      fullText += data.data;
+                      briefingTextEl.textContent = fullText;
+                    } else if (data.type === 'done') {
+                      const rawText = data.briefing || fullText;
+                      const topics = extractTopicsFromText(rawText);
+                      const displayText = stripDeepDiveLine(rawText);
+                      briefingTextEl.textContent = displayText;
+                      const parsedSections = splitTextIntoSections(displayText);
+                      resolve({
+                        success: true,
+                        briefing: displayText,
+                        sections: parsedSections,
+                        topics: topics,
+                        articleCount: data.articleCount
+                      });
+                      return;
+                    } else if (data.type === 'error') {
+                      reject(new Error(data.message));
+                      return;
+                    }
+                  } catch (e) {}
+                }
+              }
+              
+              processStream();
+            }).catch(err => {
+              console.error('Stream read error:', err);
+              if (fullText.length > 0) {
+                const topics = extractTopicsFromText(fullText);
+                const displayText = stripDeepDiveLine(fullText);
+                briefingTextEl.textContent = displayText;
+                resolve({
+                  success: true,
+                  briefing: displayText,
+                  sections: [],
+                  topics: topics
+                });
+              } else {
+                reject(err);
+              }
+            });
+          }
+          
+          processStream();
+        }).catch(reject);
+      });
+    }
+    
+    function extractTopicsFromText(text) {
+      const match = text.match(/DEEP_DIVE_TOPICS:\s*(\[.*?\])/);
+      if (match) {
+        try {
+          const topics = JSON.parse(match[1]);
+          if (Array.isArray(topics) && topics.length > 0) return topics;
+        } catch (e) {}
+      }
+      return ['Today\'s top stories'];
+    }
+
+    function stripDeepDiveLine(text) {
+      return text.replace(/\n?DEEP_DIVE_TOPICS:\s*\[.*?\]\s*$/, '').trim();
+    }
+
+    const persistentAudio = new Audio();
+    let currentAudio = persistentAudio;
+    let currentAudioUrl = null;
+    let audioUnlocked = false;
+    
+    // iOS requires audio to be "unlocked" by user gesture before async operations
+    function unlockAudio() {
+      if (audioUnlocked) return Promise.resolve();
+      
+      // Create a tiny silent audio data URI and play it
+      const silentDataUri = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYoRwmHAAAAAAD/+1DEAAAGAAGn9AAAIgAANP8AAARMQVU=';
+      
+      persistentAudio.src = silentDataUri;
+      persistentAudio.volume = 0.01;
+      
+      return persistentAudio.play().then(() => {
+        persistentAudio.pause();
+        persistentAudio.currentTime = 0;
+        persistentAudio.volume = 1;
+        audioUnlocked = true;
+        console.log('Audio unlocked for iOS');
+      }).catch(e => {
+        console.log('Audio unlock skipped:', e.message);
+        audioUnlocked = true; // Mark as unlocked anyway to avoid blocking
+      });
+    }
+    
+    async function playAudio(text, onStarted){
+      const { voice, accent } = getVoiceSettings();
+      console.log('playAudio called, text length:', text.length);
+      
+      // Unlock audio immediately on user gesture (before async fetch)
+      await unlockAudio();
+      
+      try {
+        console.log('Fetching TTS...');
+        const res = await fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, voice, accent })
+        });
+
+        if(!res.ok) {
+          const errText = await res.text();
+          console.error('TTS API error:', res.status, errText);
+          throw new Error('TTS failed: ' + errText);
+        }
+        
+        const blob = await res.blob();
+        console.log('TTS returned blob, size:', blob.size);
+        
+        if(blob.size < 100) {
+          console.error('Audio blob too small, skipping');
+          throw new Error('Audio generation failed - empty response');
+        }
+        
+        if (currentAudioUrl) {
+          URL.revokeObjectURL(currentAudioUrl);
+        }
+        currentAudioUrl = URL.createObjectURL(blob);
+        console.log('Created audio URL, starting playback...');
+        
+        return new Promise((resolve, reject) => {
+          const onEnded = () => {
+            console.log('Audio onended event fired');
+            persistentAudio.removeEventListener('ended', onEnded);
+            persistentAudio.removeEventListener('error', onError);
+            resolve();
+          };
+          const onError = (e) => {
+            console.error('Audio error event:', e);
+            persistentAudio.removeEventListener('ended', onEnded);
+            persistentAudio.removeEventListener('error', onError);
+            reject(new Error('Audio playback error'));
+          };
+          
+          persistentAudio.addEventListener('ended', onEnded);
+          persistentAudio.addEventListener('error', onError);
+          persistentAudio.src = currentAudioUrl;
+          
+          persistentAudio.play().then(() => {
+            console.log('Audio play() promise resolved - audio is playing');
+            if (onStarted) onStarted();
+          }).catch((e) => {
+            console.error('Audio play() failed:', e.name, e.message);
+            persistentAudio.removeEventListener('ended', onEnded);
+            persistentAudio.removeEventListener('error', onError);
+            reject(new Error('Audio play failed: ' + e.message));
+          });
+        });
+      } catch(e) {
+        console.error('playAudio error:', e);
+        throw e;
+      }
+    }
+
+    async function generateAudioBlob(text, voice, accent) {
+      if (!text || text.trim().length === 0) {
+        throw new Error('No text to generate audio for');
+      }
+      
+      console.log('generateAudioBlob: Sending', text.length, 'chars to TTS API');
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      
+      try {
+        const res = await fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, voice, accent }),
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error('TTS API error:', res.status, errText);
+          throw new Error('TTS failed: ' + res.status);
+        }
+        
+        const blob = await res.blob();
+        console.log('generateAudioBlob: Received', blob.size, 'bytes');
+        return blob;
+      } catch (err) {
+        clearTimeout(timeoutId);
+        if (err.name === 'AbortError') {
+          throw new Error('Audio generation timed out (30s). Please try again.');
+        }
+        throw err;
+      }
+    }
+
+    async function playChunkedAudio(sections, onStarted) {
+      const { voice, accent } = getVoiceSettings();
+      console.log('playChunkedAudio: Starting with', sections.length, 'sections');
+      console.log('Sections structure:', JSON.stringify(sections.map(s => ({ id: s?.id, hasText: !!s?.text, textLen: s?.text?.length }))));
+      
+      // Unlock audio immediately on user gesture (before async fetch)
+      await unlockAudio();
+      
+      let audioStartedCalled = false;
+      
+      function getChunkText(indices) {
+        return indices
+          .filter(i => sections[i] && sections[i].text)
+          .map(i => sections[i].text)
+          .join('\n\n')
+          .replace(/\n?DEEP_DIVE_TOPICS:\s*\[.*?\]\s*$/, '').trim();
+      }
+      
+      const chunk1Text = getChunkText([0, 1]);
+      const chunk2Text = getChunkText([2]);
+      const chunk3Text = getChunkText([3, 4, 5, 6]);
+      
+      console.log('Chunk 1 (Opening+TopStory):', chunk1Text.length, 'chars');
+      console.log('Chunk 2 (HardNews):', chunk2Text.length, 'chars');
+      console.log('Chunk 3 (Rest):', chunk3Text.length, 'chars');
+      
+      if (chunk1Text.length === 0 && chunk2Text.length === 0 && chunk3Text.length === 0) {
+        console.error('All chunks are empty! Section data may be malformed.');
+        throw new Error('No audio content available. Please regenerate the briefing.');
+      }
+      
+      const chunks = [
+        { text: chunk1Text, blob: null, url: null, ready: false, error: null },
+        { text: chunk2Text, blob: null, url: null, ready: false, error: null },
+        { text: chunk3Text, blob: null, url: null, ready: false, error: null }
+      ].filter(c => c.text.length > 0);
+      
+      if (chunks.length === 0) {
+        console.error('No chunks to play');
+        throw new Error('No audio content available');
+      }
+      
+      async function generateChunk(index) {
+        if (index >= chunks.length) return;
+        const chunk = chunks[index];
+        console.log(`Generating chunk ${index + 1}...`);
+        try {
+          chunk.blob = await generateAudioBlob(chunk.text, voice, accent);
+          chunk.url = URL.createObjectURL(chunk.blob);
+          chunk.ready = true;
+          console.log(`Chunk ${index + 1} ready, size:`, chunk.blob.size);
+        } catch (err) {
+          console.error(`Chunk ${index + 1} generation failed:`, err);
+          chunk.error = err;
+        }
+      }
+      
+      async function playChunk(index) {
+        const chunk = chunks[index];
+        if (!chunk.ready || !chunk.url) {
+          console.error(`Chunk ${index + 1} not ready for playback`);
+          throw new Error(`Audio chunk ${index + 1} not ready`);
+        }
+        
+        if (currentAudioUrl) {
+          URL.revokeObjectURL(currentAudioUrl);
+        }
+        currentAudioUrl = chunk.url;
+        
+        console.log(`Playing chunk ${index + 1}...`);
+        return new Promise((resolve, reject) => {
+          const onEnded = () => {
+            console.log(`Chunk ${index + 1} ended`);
+            persistentAudio.removeEventListener('ended', onEnded);
+            persistentAudio.removeEventListener('error', onError);
+            resolve();
+          };
+          const onError = (e) => {
+            console.error(`Chunk ${index + 1} error:`, e);
+            persistentAudio.removeEventListener('ended', onEnded);
+            persistentAudio.removeEventListener('error', onError);
+            reject(new Error('Audio playback error'));
+          };
+          
+          persistentAudio.addEventListener('ended', onEnded);
+          persistentAudio.addEventListener('error', onError);
+          persistentAudio.src = currentAudioUrl;
+          
+          persistentAudio.play().then(() => {
+            console.log(`Chunk ${index + 1} started playing`);
+            if (!audioStartedCalled && onStarted) {
+              onStarted();
+              audioStartedCalled = true;
+            }
+          }).catch((e) => {
+            console.error(`Chunk ${index + 1} play failed:`, e);
+            persistentAudio.removeEventListener('ended', onEnded);
+            persistentAudio.removeEventListener('error', onError);
+            reject(new Error('Audio play failed: ' + e.message));
+          });
+        });
+      }
+      
+      async function waitForChunk(index) {
+        const chunk = chunks[index];
+        if (chunk.ready || chunk.error) return;
+        console.log(`Waiting for chunk ${index + 1} to finish generating...`);
+        await new Promise(resolve => {
+          const check = setInterval(() => {
+            if (chunk.ready || chunk.error) {
+              clearInterval(check);
+              resolve();
+            }
+          }, 100);
+        });
+      }
+      
+      await generateChunk(0);
+      
+      if (!chunks[0].ready) {
+        console.error('First chunk failed to generate');
+        return;
+      }
+      
+      if (chunks.length > 1) {
+        generateChunk(1);
+      }
+      
+      await playChunk(0);
+      
+      if (chunks.length > 1) {
+        await waitForChunk(1);
+        if (chunks[1].ready) {
+          if (chunks.length > 2) {
+            generateChunk(2);
+          }
+          await playChunk(1);
+        }
+      }
+      
+      if (chunks.length > 2) {
+        await waitForChunk(2);
+        if (chunks[2].ready) {
+          await playChunk(2);
+        }
+      }
+      
+      console.log('Chunked playback complete');
+    }
+
+    async function playChunkedDeepDive(text, btn) {
+      const { voice, accent } = getVoiceSettings();
+      console.log('playChunkedDeepDive: Starting with', text.length, 'chars');
+      
+      const paragraphs = text.split(/\n\n+/).filter(p => p.trim().length > 0);
+      console.log('Deep dive has', paragraphs.length, 'paragraphs');
+      
+      let chunkTexts = [];
+      if (paragraphs.length <= 3) {
+        chunkTexts = paragraphs;
+      } else {
+        const third = Math.ceil(paragraphs.length / 3);
+        chunkTexts = [
+          paragraphs.slice(0, third).join('\n\n'),
+          paragraphs.slice(third, third * 2).join('\n\n'),
+          paragraphs.slice(third * 2).join('\n\n')
+        ];
+      }
+      
+      const chunks = chunkTexts
+        .filter(t => t.trim().length > 0)
+        .map(t => ({ text: t, blob: null, url: null, ready: false, error: null }));
+      
+      console.log('Deep dive chunks:', chunks.map((c, i) => `Chunk ${i+1}: ${c.text.length} chars`));
+      
+      if (chunks.length === 0) {
+        throw new Error('No content to play');
+      }
+      
+      async function generateChunk(index) {
+        if (index >= chunks.length) return;
+        const chunk = chunks[index];
+        console.log(`Deep dive: Generating chunk ${index + 1}...`);
+        try {
+          chunk.blob = await generateAudioBlob(chunk.text, voice, accent);
+          chunk.url = URL.createObjectURL(chunk.blob);
+          chunk.ready = true;
+          console.log(`Deep dive: Chunk ${index + 1} ready, size:`, chunk.blob.size);
+        } catch (err) {
+          console.error(`Deep dive: Chunk ${index + 1} failed:`, err);
+          chunk.error = err;
+        }
+      }
+      
+      async function playChunk(index) {
+        const chunk = chunks[index];
+        if (!chunk.ready || !chunk.url) {
+          console.error(`Deep dive: Chunk ${index + 1} not ready`);
+          return;
+        }
+        
+        if (currentAudioUrl) {
+          URL.revokeObjectURL(currentAudioUrl);
+        }
+        currentAudioUrl = chunk.url;
+        
+        console.log(`Deep dive: Playing chunk ${index + 1}...`);
+        return new Promise((resolve) => {
+          const onEnded = () => {
+            persistentAudio.removeEventListener('ended', onEnded);
+            persistentAudio.removeEventListener('error', onError);
+            resolve();
+          };
+          const onError = (e) => {
+            console.error(`Deep dive: Chunk ${index + 1} error:`, e);
+            persistentAudio.removeEventListener('ended', onEnded);
+            persistentAudio.removeEventListener('error', onError);
+            resolve();
+          };
+          
+          persistentAudio.addEventListener('ended', onEnded);
+          persistentAudio.addEventListener('error', onError);
+          persistentAudio.src = currentAudioUrl;
+          
+          persistentAudio.play().catch((e) => {
+            console.error(`Deep dive: Chunk ${index + 1} play failed:`, e);
+            persistentAudio.removeEventListener('ended', onEnded);
+            persistentAudio.removeEventListener('error', onError);
+            resolve();
+          });
+        });
+      }
+      
+      async function waitForChunk(index) {
+        const chunk = chunks[index];
+        if (chunk.ready || chunk.error) return;
+        while (!chunk.ready && !chunk.error) {
+          await new Promise(r => setTimeout(r, 100));
+        }
+      }
+      
+      generateChunk(0);
+      if (chunks.length > 1) {
+        generateChunk(1);
+      }
+      
+      await waitForChunk(0);
+      if (!chunks[0].ready) {
+        throw new Error('Failed to generate deep dive audio');
+      }
+      
+      if (btn) btn.textContent = 'Playing audio';
+      await playChunk(0);
+      
+      if (chunks.length > 1) {
+        await waitForChunk(1);
+        if (chunks[1].ready) {
+          if (chunks.length > 2) {
+            generateChunk(2);
+          }
+          await playChunk(1);
+        }
+      }
+      
+      if (chunks.length > 2) {
+        await waitForChunk(2);
+        if (chunks[2].ready) {
+          await playChunk(2);
+        }
+      }
+      
+      console.log('Deep dive playback complete');
+    }
+
+    async function generateDeepDive(topics, briefing){
+      const res = await fetch('/api/deep-dive', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topics, briefing })
+      });
+      if(!res.ok) throw new Error('Deep dive failed');
+      return res.json();
+    }
+
+    function showLiveAlert(alertText) {
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' };
+      document.getElementById('liveAlertMeta').textContent = now.toLocaleDateString('en-US', options);
+      document.getElementById('liveAlertText').textContent = alertText;
+      state.lastLiveAlertText = alertText;
+      show('sLiveAlert');
+    }
+
+    document.getElementById('btnPlayLiveAlert').onclick = async () => {
+      const btn = document.getElementById('btnPlayLiveAlert');
+      if (isPlaying) {
+        currentAudio.pause();
+        isPlaying = false;
+        btn.textContent = 'Play audio';
+        return;
+      }
+      btn.textContent = 'Loading audio...';
+      btn.disabled = true;
+      try {
+        isPlaying = true;
+        await playAudio(state.lastLiveAlertText, () => {
+          btn.disabled = false;
+          btn.textContent = 'Pause audio';
+        });
+        btn.textContent = 'Play audio';
+        isPlaying = false;
+      } catch(e) {
+        console.error('Live alert audio error:', e);
+        btn.textContent = 'Play audio';
+        btn.disabled = false;
+        isPlaying = false;
+      }
+    };
+
+    document.getElementById('btnLiveAlertHome').onclick = () => {
+      if (isPlaying) {
+        currentAudio.pause();
+        isPlaying = false;
+      }
+      const firstName = (state.name || '').split(' ')[0];
+      const capitalizedFirst = firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() : '';
+      document.getElementById('greetingText').textContent = capitalizedFirst ? `Hello, ${capitalizedFirst}!` : 'Hello!';
+      show('s1b');
+    };
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'live-update') {
+          showLiveAlert(event.data.title + ': ' + event.data.body);
+        }
+      });
+    }
+
+    // Init
+    (async () => {
+      const isReturningUser = await loadState();
+
+      const params = new URLSearchParams(window.location.search);
+      const liveUpdateText = params.get('liveUpdate');
+      if (liveUpdateText) {
+        window.history.replaceState({}, '', '/');
+        showLiveAlert(liveUpdateText);
+        return;
+      }
+
+      if(isReturningUser){
+        const firstName = (state.name || '').split(' ')[0];
+        const capitalizedFirst = firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() : '';
+        document.getElementById('greetingText').textContent = capitalizedFirst ? `Hello, ${capitalizedFirst}!` : 'Hello!';
+        show('s1b');
+      } else {
+        show('s1');
+      }
+    })();
+
+    // Home button - always visible, takes you to home
+    document.getElementById('btnHome').onclick = () => {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        show('s1b');
+      } else {
+        show('s1');
+      }
+    };
+
+    // Navigation: New user flow
+    document.getElementById('btnStart').onclick = () => show('s2');
+
+    document.getElementById('btnS2').onclick = () => {
+      state.name = document.getElementById('name').value.trim() || "Friend";
+      state.email = document.getElementById('email').value.trim();
+      saveState();
+      renderTopics();
+      show('s4');
+    };
+
+    document.getElementById('btnS2Back').onclick = () => show('s1');
+
+    document.getElementById('btnS4Back').onclick = () => show('s2');
+    document.getElementById('btnS4').onclick = () => { renderRegions(); show('s5'); };
+
+    document.getElementById('btnS5Back').onclick = () => { renderTopics(); show('s4'); };
+    document.getElementById('btnS5').onclick = () => {
+      updateVoiceRadios('genderGroup', 'accentGroup');
+      show('s6');
+    };
+
+    document.getElementById('btnS6Back').onclick = () => { renderRegions(); show('s5'); };
+    document.getElementById('btnS6').onclick = () => {
+      state.voiceGender = document.querySelector('input[name="voiceGender"]:checked')?.value || 'male';
+      state.voiceAccent = document.querySelector('input[name="voiceAccent"]:checked')?.value || 'american';
+      saveState();
+      updateLengthSelection('s6b');
+      show('s6b');
+    };
+
+    document.getElementById('s6b').querySelectorAll('.seg[data-length]').forEach(seg => {
+      seg.onclick = () => {
+        document.getElementById('s6b').querySelectorAll('.seg[data-length]').forEach(s => s.classList.remove('active'));
+        seg.classList.add('active');
+        state.briefingLength = seg.dataset.length;
+      };
+    });
+
+    document.getElementById('btnS6b').onclick = () => {
+      saveState();
+      renderScheduleUI('scheduleTimesContainer', 's7');
+      show('s7');
+    };
+    document.getElementById('btnS6bBack').onclick = () => {
+      updateVoiceRadios('genderGroup', 'accentGroup');
+      show('s6');
+    };
+    document.getElementById('btnS7Back').onclick = () => {
+      updateLengthSelection('s6b');
+      show('s6b');
+    };
+
+    function renderScheduleUI(containerId, screenId) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      
+      for (let i = 0; i < state.briefingsPerDay; i++) {
+        const timeBox = document.createElement('div');
+        timeBox.className = 'timeBox';
+        
+        const label = document.createElement('p');
+        label.className = 'timeLabel';
+        label.textContent = `Briefing ${i + 1}`;
+        
+        const timeInput = document.createElement('input');
+        timeInput.type = 'time';
+        timeInput.id = `${containerId}_time${i}`;
+        timeInput.value = state.briefingTimes[i] || '08:00';
+        timeInput.onchange = (e) => {
+          state.briefingTimes[i] = e.target.value;
+          saveState();
+        };
+        
+        timeBox.appendChild(label);
+        timeBox.appendChild(timeInput);
+        container.appendChild(timeBox);
+      }
+      
+      const segRow = document.getElementById(screenId).querySelector('.segRow');
+      if (segRow) {
+        segRow.querySelectorAll('.seg').forEach(seg => {
+          const count = parseInt(seg.dataset.count);
+          seg.classList.toggle('active', count === state.briefingsPerDay);
+          seg.onclick = () => {
+            state.briefingsPerDay = count;
+            saveState();
+            renderScheduleUI(containerId, screenId);
+          };
+        });
+      }
+    }
+
+    document.getElementById('btnS7').onclick = async () => {
+      state.isRegistered = true;
+      saveState();
+      show('s7b');
+    };
+
+    document.getElementById('btnOnboardLiveYes').onclick = async () => {
+      try {
+        if (!('Notification' in window) || !('PushManager' in window)) {
+          alert('Notifications are not supported in this browser. Please save to Home Screen to enable them.');
+          state.liveUpdatesDeclined = true;
+          saveState();
+          show('s8');
+          return;
+        }
+
+        let perm = Notification.permission;
+        if (perm !== 'granted') {
+          perm = await Notification.requestPermission();
+        }
+        if (perm !== 'granted') {
+          alert('Notifications were not enabled. You can change this later in Settings.');
+          state.liveUpdatesDeclined = true;
+          saveState();
+          show('s8');
+          return;
+        }
+
+        await setupNotifications();
+        await subscribeLiveUpdates();
+        state.liveUpdatesSubscribed = true;
+        state.liveUpdatesDeclined = false;
+        saveState();
+      } catch (err) {
+        console.log('Live updates subscription error:', err);
+        state.liveUpdatesDeclined = true;
+        saveState();
+      }
+      show('s8');
+    };
+
+    document.getElementById('btnOnboardLiveNo').onclick = () => {
+      state.liveUpdatesDeclined = true;
+      state.liveUpdatesSubscribed = false;
+      saveState();
+      show('s8');
+    };
+
+    let swRegistration = null;
+    let alarmAudio = null;
+
+    async function setupNotifications(options = {}) {
+      const silent = options.silent || false;
+      console.log('setupNotifications called', silent ? '(silent)' : '');
+      
+      if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+        console.log('Push notifications not supported in this browser');
+        if (!silent) alert('Notifications are not supported in this browser. Please save to Home Screen to enable them.');
+        return false;
+      }
+
+      let permission = Notification.permission;
+      if (permission === 'denied') {
+        console.log('Notification permission previously denied');
+        return false;
+      }
+      if (permission !== 'granted') {
+        console.log('Requesting notification permission...');
+        permission = await Notification.requestPermission();
+        console.log('Permission result:', permission);
+      }
+      if (permission !== 'granted') {
+        console.log('Notification permission not granted');
+        return false;
+      }
+
+      try {
+        swRegistration = await navigator.serviceWorker.register('/sw.js');
+        await navigator.serviceWorker.ready;
+        console.log('Service worker registered');
+        
+        const vapidRes = await fetch('/api/vapid-public-key');
+        const { publicKey } = await vapidRes.json();
+        
+        if (!publicKey) {
+          console.log('No VAPID key available');
+          return false;
+        }
+        
+        let subscription = await swRegistration.pushManager.getSubscription();
+        
+        if (!subscription) {
+          const convertedKey = urlBase64ToUint8Array(publicKey);
+          subscription = await swRegistration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: convertedKey
+          });
+          console.log('New push subscription created');
+        } else {
+          console.log('Using existing push subscription');
+        }
+        
+        const userId = state.uuid;
+        try {
+          const saveRes = await fetch('/api/push-subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subscription, userId })
+          });
+          if (saveRes.ok) console.log('Push subscription saved to server');
+          else console.error('Push subscription save failed:', saveRes.status);
+        } catch (saveErr) {
+          console.error('Failed to save push subscription:', saveErr);
+          return false;
+        }
+        
+        state.pushUserId = userId;
+        await scheduleAllBriefings();
+
+        if (state.liveUpdatesSubscribed) {
+          await subscribeLiveUpdates();
+        }
+
+        return true;
+      } catch (err) {
+        console.error('Push setup failed:', err);
+        return false;
+      }
+    }
+    
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
+
+    async function scheduleAllBriefings() {
+      if (!state.pushUserId) return;
+      
+      const scheduleTimes = [];
+      for (let i = 0; i < state.briefingsPerDay; i++) {
+        if (state.briefingTimes[i]) {
+          scheduleTimes.push(state.briefingTimes[i]);
+        }
+      }
+      
+      if (scheduleTimes.length === 0) return;
+      
+      const { voice, accent } = getVoiceSettings();
+      const preferences = {
+        topics: Array.from(state.topics),
+        regions: Array.from(state.regions),
+        outlets: Array.from(state.outlets),
+        voice,
+        accent
+      };
+      
+      try {
+        const res = await fetch('/api/schedule-notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: state.pushUserId,
+            scheduleTimes,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            preferences
+          })
+        });
+        const data = await res.json();
+        console.log('Scheduled', data.scheduledCount, 'notifications on server');
+      } catch (err) {
+        console.error('Failed to schedule notifications:', err);
+      }
+    }
+    
+    async function checkCachedBriefing() {
+      if (!state.pushUserId) return null;
+      
+      try {
+        const res = await fetch(`/api/cached-briefing/${encodeURIComponent(state.pushUserId)}`);
+        if (!res.ok) return null;
+        
+        const data = await res.json();
+        console.log('Found cached briefing from:', data.generatedAt);
+        return data;
+      } catch (err) {
+        console.log('No cached briefing available');
+        return null;
+      }
+    }
+    
+    async function playCachedAudio() {
+      if (!state.pushUserId) return false;
+      
+      try {
+        const res = await fetch(`/api/cached-audio/${encodeURIComponent(state.pushUserId)}`);
+        if (!res.ok) return false;
+        
+        const blob = await res.blob();
+        if (blob.size < 1000) return false;
+        
+        if (currentAudioUrl) {
+          URL.revokeObjectURL(currentAudioUrl);
+        }
+        currentAudioUrl = URL.createObjectURL(blob);
+        persistentAudio.src = currentAudioUrl;
+        await persistentAudio.play();
+        console.log('Playing cached audio');
+        return true;
+      } catch (err) {
+        console.error('Failed to play cached audio:', err);
+        return false;
+      }
+    }
+
+    function playAlarmAndNotify(timeOfDay) {
+      if (!alarmAudio) {
+        alarmAudio = new Audio('/alarm.mp3');
+      }
+      alarmAudio.play().catch(e => console.log('Audio play failed:', e));
+      
+      if (swRegistration) {
+        swRegistration.showNotification('Newsy', {
+          body: `Your ${timeOfDay} briefing is ready. Open to listen.`,
+          icon: '/icon.svg',
+          tag: 'briefing-reminder',
+          requireInteraction: true,
+          vibrate: [200, 100, 200, 100, 200]
+        });
+      }
+    }
+
+    if (state.isRegistered && 'serviceWorker' in navigator) {
+      setTimeout(() => {
+        setupNotifications({ silent: true }).catch(err => console.log('Notification setup failed:', err));
+      }, 100);
+    }
+
+    document.getElementById('btnLiveEnablePush').onclick = async () => {
+      const perm = await Notification.requestPermission();
+      if (perm === 'granted') {
+        await setupNotifications();
+        await subscribeLiveUpdates();
+        show('sLiveConfirm');
+        setTimeout(() => { show('s8'); }, 2000);
+      } else {
+        alert('Notifications were not enabled. Please enable them in your browser settings and try again.');
+        show('s8');
+      }
+    };
+
+    async function subscribeLiveUpdates() {
+      const userId = state.uuid;
+      try {
+        const res = await fetch('/api/subscribe-live-updates', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, topic: 'middle-east-tensions' })
+        });
+        if (res.ok) {
+          state.liveUpdatesSubscribed = true;
+          saveState();
+        }
+      } catch (err) {
+        console.error('Failed to subscribe to live updates:', err);
+      }
+    }
+
+    let countdownInterval = null;
+    let countdownStopped = false;
+    function startCountdown(seconds) {
+      clearInterval(countdownInterval);
+      countdownStopped = false;
+      let statusIndex = 0;
+      const statuses = [
+        'Reading publications ...',
+        'Scanning the news wires ...',
+        'Synthesizing viewpoints ...',
+        'Analyzing the latest dispatches ...',
+        'Aggregating cross-source reporting ...',
+        'Cross-referencing real-time sources ...',
+        'Synthesizing real-time data ...',
+        'Translating from multiple sources ...',
+        'Triangulating the latest reports ...',
+        'Consolidating breaking coverage ...'
+      ];
+      const briefingEl = document.getElementById('briefingText');
+      briefingEl.classList.add('loading');
+      
+      briefingEl.textContent = statuses[0];
+      countdownInterval = setInterval(() => {
+        if (countdownStopped) return;
+        statusIndex++;
+        if (statusIndex >= statuses.length) {
+          statusIndex = 0;
+        }
+        briefingEl.textContent = statuses[statusIndex];
+      }, 5000);
+    }
+    function stopCountdown() {
+      countdownStopped = true;
+      clearInterval(countdownInterval);
+      document.getElementById('briefingText').classList.remove('loading');
+    }
+
+    // Listen now (from setup complete)
+    function showBriefingResult(briefing, topics, sections, hasAudio) {
+      stopCountdown();
+      document.getElementById('briefingInstruction').style.display = 'none';
+      document.getElementById('btnPlay').style.display = '';
+      state.lastBriefingText = briefing;
+      state.briefingSections = sections || [];
+      state.currentSectionIndex = 0;
+      state.useCachedAudio = hasAudio || false;
+      preloadedAudioBlobs = [];
+
+      document.getElementById('briefingText').textContent = briefing;
+      document.getElementById('btnPlay').textContent = 'Play briefing';
+      document.getElementById('btnPlay').disabled = false;
+
+      const pillRow = document.getElementById('deepDivePills');
+      pillRow.innerHTML = '';
+      state.deepDiveSelection.clear();
+
+      if (topics && topics.length > 0) {
+        document.getElementById('deepDiveSection').classList.remove('hidden');
+        topics.forEach(t => {
+          const pill = document.createElement('div');
+          pill.className = 'pill';
+          pill.textContent = t;
+          pill.onclick = () => {
+            pill.classList.toggle('active');
+            if (state.deepDiveSelection.has(t)) {
+              state.deepDiveSelection.delete(t);
+            } else {
+              state.deepDiveSelection.add(t);
+            }
+          };
+          pillRow.appendChild(pill);
+        });
+      }
+    }
+
+    document.getElementById('btnListenNow').onclick = async () => {
+      await setupNotifications();
+      document.getElementById('briefingInstruction').style.display = 'none';
+      document.getElementById('briefingMeta').textContent = getBriefingTimestamp();
+      document.getElementById('btnPlay').style.display = 'none';
+      document.getElementById('deepDiveSection').classList.add('hidden');
+      document.getElementById('briefingText').textContent = '';
+      show('s9');
+      startCountdown(120);
+
+      const cached = await checkCachedBriefing();
+      if (cached && cached.briefing) {
+        showBriefingResult(cached.briefing, cached.topics, cached.sections, cached.hasAudio);
+        return;
+      }
+
+      try {
+        const data = await generateBriefing();
+        showBriefingResult(data.briefing, data.topics, data.sections, false);
+      } catch(e) {
+        stopCountdown();
+        document.getElementById('briefingInstruction').style.display = '';
+        document.getElementById('btnPlay').style.display = '';
+        document.getElementById('briefingInstruction').textContent = 'Your briefing';
+        document.getElementById('briefingText').textContent = 'Error generating briefing. Please try again.';
+        document.getElementById('btnPlay').textContent = 'Try again';
+        document.getElementById('btnPlay').disabled = false;
+      }
+    };
+
+    // Returning user: Get briefing
+    document.getElementById('btnGetBriefing').onclick = async () => {
+      document.getElementById('briefingMeta').textContent = getBriefingTimestamp();
+      document.getElementById('deepDiveSection').classList.add('hidden');
+      document.getElementById('briefingInstruction').style.display = 'none';
+      document.getElementById('btnPlay').style.display = 'none';
+      document.getElementById('briefingText').textContent = '';
+      show('s9');
+      startCountdown(120);
+      
+      const cached = await checkCachedBriefing();
+      if (cached && cached.briefing) {
+        showBriefingResult(cached.briefing, cached.topics, cached.sections, cached.hasAudio);
+        return;
+      }
+
+      try {
+        const data = await generateBriefing();
+        showBriefingResult(data.briefing, data.topics, data.sections, false);
+      } catch(e) {
+        stopCountdown();
+        document.getElementById('briefingInstruction').style.display = '';
+        document.getElementById('btnPlay').style.display = '';
+        document.getElementById('briefingInstruction').textContent = 'Your briefing';
+        document.getElementById('briefingText').textContent = 'Error generating briefing. Please try again.';
+        document.getElementById('btnPlay').textContent = 'Try again';
+        document.getElementById('btnPlay').disabled = false;
+      }
+    };
+
+    // Play briefing
+    let isPlaying = false;
+    document.getElementById('btnPlay').onclick = async () => {
+      const btn = document.getElementById('btnPlay');
+      
+      if (isPlaying && currentAudio) {
+        currentAudio.pause();
+        isPlaying = false;
+        btn.textContent = 'Resume audio';
+        return;
+      }
+      
+      if (btn.textContent === 'Resume audio' && currentAudio) {
+        currentAudio.play();
+        isPlaying = true;
+        btn.textContent = 'Pause audio';
+        return;
+      }
+      
+      btn.textContent = 'Loading audio ...';
+      btn.disabled = true;
+      const audioLoadingTexts = ['Loading audio ...', 'Working on it ...', 'Any second now ...', 'Almost there ...', 'Good things come to those who wait ...'];
+      let audioLoadIdx = 0;
+      const audioLoadInterval = setInterval(() => {
+        audioLoadIdx = (audioLoadIdx + 1) % audioLoadingTexts.length;
+        btn.textContent = audioLoadingTexts[audioLoadIdx];
+      }, 5000);
+
+      const onAudioStarted = () => {
+        clearInterval(audioLoadInterval);
+        btn.disabled = false;
+        btn.textContent = 'Pause audio';
+      };
+
+      try {
+        isPlaying = true;
+        await playAudio(state.lastBriefingText, onAudioStarted);
+      } catch(e) {
+        clearInterval(audioLoadInterval);
+        console.error('Audio playback error:', e);
+        alert('Error playing audio: ' + e.message);
+      }
+
+      isPlaying = false;
+      btn.textContent = 'Play briefing';
+      btn.disabled = false;
+    };
+
+    // Deep dive
+    document.getElementById('btnNoDive').onclick = () => show('s1b');
+    document.getElementById('btnDive').onclick = async () => {
+      const selected = Array.from(state.deepDiveSelection);
+      if(selected.length === 0){
+        alert('Please select at least one topic');
+        return;
+      }
+
+      document.getElementById('deepDiveText').textContent = 'Generating deep dive...';
+      document.getElementById('btnGoDeeper').style.display = 'block';
+      show('s10');
+
+      try {
+        state.currentDeepDiveTopic = selected.join(', ');
+        const data = await generateDeepDive(selected, state.lastBriefingText);
+        state.currentDeepDiveText = data.deepDive;
+        document.getElementById('deepDiveText').textContent = data.deepDive;
+      } catch(e) {
+        document.getElementById('deepDiveText').textContent = 'Error generating deep dive.';
+      }
+    };
+
+    let isDivePlaying = false;
+    document.getElementById('btnPlayDive').onclick = async () => {
+      const btn = document.getElementById('btnPlayDive');
+      
+      if (isDivePlaying && currentAudio) {
+        currentAudio.pause();
+        isDivePlaying = false;
+        btn.textContent = 'Resume audio';
+        return;
+      }
+      
+      if (btn.textContent === 'Resume audio' && currentAudio) {
+        currentAudio.play();
+        isDivePlaying = true;
+        btn.textContent = 'Pause audio';
+        return;
+      }
+      
+      btn.textContent = 'Loading audio ...';
+      btn.disabled = true;
+      const diveAudioLoadTexts = ['Loading audio ...', 'Working on it ...', 'Any second now ...', 'Almost there ...', 'Good things come to those who wait ...'];
+      let diveAudioLoadIdx = 0;
+      const diveAudioLoadInterval = setInterval(() => {
+        diveAudioLoadIdx = (diveAudioLoadIdx + 1) % diveAudioLoadTexts.length;
+        btn.textContent = diveAudioLoadTexts[diveAudioLoadIdx];
+      }, 5000);
+
+      const onAudioStarted = () => {
+        clearInterval(diveAudioLoadInterval);
+        btn.disabled = false;
+        btn.textContent = 'Pause audio';
+      };
+
+      try {
+        isDivePlaying = true;
+        const text = document.getElementById('deepDiveText').textContent;
+        await playAudio(text, onAudioStarted);
+      } catch(e) {
+        clearInterval(diveAudioLoadInterval);
+        console.error('Deep dive audio error:', e);
+        alert('Error playing audio: ' + e.message);
+      }
+
+      isDivePlaying = false;
+      btn.textContent = 'Play deep dive';
+      btn.disabled = false;
+    };
+
+    document.getElementById('btnGoDeeper').onclick = async () => {
+      const btn = document.getElementById('btnGoDeeper');
+      const origText = btn.textContent;
+      btn.textContent = 'Going deeper...';
+      btn.disabled = true;
+      
+      document.getElementById('deepDiveText').textContent = 'Generating deeper analysis...';
+      
+      try {
+        const res = await fetch('/api/deeper-dive', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            topic: state.currentDeepDiveTopic, 
+            previousDive: state.currentDeepDiveText
+          })
+        });
+        
+        if (!res.ok) throw new Error('Deeper dive failed');
+        
+        const data = await res.json();
+        state.currentDeepDiveText = data.deeperDive;
+        document.getElementById('deepDiveText').textContent = data.deeperDive;
+        btn.style.display = 'none';
+      } catch(e) {
+        console.error('Deeper dive error:', e);
+        document.getElementById('deepDiveText').textContent = 'Error generating deeper analysis.';
+      }
+      
+      btn.textContent = origText;
+      btn.disabled = false;
+    };
+
+    document.getElementById('btnBackToBriefing').onclick = () => show('s9');
+
+    // Settings
+    document.getElementById('btnSettings').onclick = () => show('s11');
+    document.getElementById('btnSettingsBriefing').onclick = () => show('s11');
+    document.getElementById('btnBackToBriefingFromSettings').onclick = () => show('s9');
+    document.getElementById('btnSettingsBack').onclick = () => {
+      const firstName = (state.name || '').split(' ')[0];
+      const capitalizedFirst = firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() : '';
+      document.getElementById('greetingText').textContent = capitalizedFirst ? `Hello, ${capitalizedFirst}!` : 'Hello!';
+      show('s1b');
+    };
+
+    document.getElementById('btnLogout').onclick = () => {
+      localStorage.removeItem(STORAGE_KEY);
+      document.cookie = `${UUID_COOKIE}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      location.reload();
+    };
+
+    // Edit Topics
+    document.getElementById('btnEditTopics').onclick = () => {
+      renderTopics('topicListEdit');
+      show('sEditTopics');
+    };
+    document.getElementById('btnSaveTopics').onclick = () => {
+      saveState();
+      show('s11');
+    };
+
+    // Edit Regions
+    document.getElementById('btnEditRegions').onclick = () => {
+      renderRegions('regionListEdit');
+      show('sEditRegions');
+    };
+    document.getElementById('btnSaveRegions').onclick = () => {
+      saveState();
+      show('s11');
+    };
+
+    // Edit Voice
+    document.getElementById('btnEditVoice').onclick = () => {
+      updateVoiceRadios('genderGroupEdit', 'accentGroupEdit');
+      show('sEditVoice');
+    };
+    document.getElementById('btnSaveVoice').onclick = () => {
+      state.voiceGender = document.querySelector('input[name="voiceGenderEdit"]:checked')?.value || 'male';
+      state.voiceAccent = document.querySelector('input[name="voiceAccentEdit"]:checked')?.value || 'american';
+      saveState();
+      show('s11');
+    };
+
+    // Edit Briefing Length
+    document.getElementById('btnEditLength').onclick = () => {
+      updateLengthSelection('sEditLength');
+      show('sEditLength');
+    };
+    document.getElementById('sEditLength').querySelectorAll('.seg[data-length]').forEach(seg => {
+      seg.onclick = () => {
+        document.getElementById('sEditLength').querySelectorAll('.seg[data-length]').forEach(s => s.classList.remove('active'));
+        seg.classList.add('active');
+        state.briefingLength = seg.dataset.length;
+      };
+    });
+    document.getElementById('btnSaveLength').onclick = () => {
+      saveState();
+      show('s11');
+    };
+
+    // Edit Schedule
+    document.getElementById('btnEditSchedule').onclick = () => {
+      renderScheduleUI('scheduleTimesContainerEdit', 'sEditSchedule');
+      show('sEditSchedule');
+    };
+
+    document.getElementById('btnSaveSchedule').onclick = () => {
+      saveState();
+      scheduleAllBriefings();
+      show('s11');
+    };
+
+    // Edit Live Updates
+    document.getElementById('btnEditLiveUpdates').onclick = () => {
+      const statusEl = document.getElementById('liveUpdatesEditStatus');
+      const btnsEl = document.getElementById('liveUpdatesEditBtns');
+      if (state.liveUpdatesSubscribed) {
+        statusEl.classList.remove('hidden');
+        btnsEl.style.display = 'none';
+      } else {
+        statusEl.classList.add('hidden');
+        btnsEl.style.display = '';
+      }
+      show('sEditLiveUpdates');
+    };
+
+    document.getElementById('btnEditLiveYes').onclick = async () => {
+      if (!('Notification' in window) || !('PushManager' in window)) {
+        alert('Notifications are not supported in this browser. Please save to Home Screen to enable them.');
+        return;
+      }
+
+      let perm = Notification.permission;
+      if (perm !== 'granted') {
+        show('sLiveEnable');
+        return;
+      }
+
+      await setupNotifications();
+      await subscribeLiveUpdates();
+      state.liveUpdatesSubscribed = true;
+      state.liveUpdatesDeclined = false;
+      saveState();
+      document.getElementById('liveUpdatesEditStatus').classList.remove('hidden');
+      document.getElementById('liveUpdatesEditBtns').style.display = 'none';
+    };
+
+    document.getElementById('btnEditLiveNo').onclick = () => {
+      state.liveUpdatesSubscribed = false;
+      state.liveUpdatesDeclined = true;
+      saveState();
+      show('s11');
+    };
+
+    document.getElementById('btnEditLiveBack').onclick = () => {
+      show('s11');
+    };
+
+    // Feedback
+    document.getElementById('btnFeedback').onclick = () => {
+      document.getElementById('feedbackText').value = '';
+      show('sFeedback');
+    };
+
+    document.getElementById('btnSubmitFeedback').onclick = async () => {
+      const text = document.getElementById('feedbackText').value.trim();
+      if (!text) {
+        alert('Please write something before submitting.');
+        return;
+      }
+      const btn = document.getElementById('btnSubmitFeedback');
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+      try {
+        await fetch('/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: state.uuid, name: state.name, email: state.email, message: text })
+        });
+        alert('Thank you for your feedback!');
+        show('s11');
+      } catch (err) {
+        alert('Failed to send feedback. Please try again.');
+      }
+      btn.textContent = 'Submit';
+      btn.disabled = false;
+    };
+
+    document.getElementById('btnFeedbackBack').onclick = () => {
+      show('s11');
+    };
+  </script>
+</body>
+</html>

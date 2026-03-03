@@ -1,0 +1,26 @@
+{
+  "name": "newsy",
+  "version": "1.0.0",
+  "description": "News briefing app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.2",
+    "drizzle-zod": "^0.8.3",
+    "elevenlabs": "^1.59.0",
+    "express": "^4.22.1",
+    "node-cron": "^4.2.1",
+    "openai": "^6.16.0",
+    "p-limit": "^7.2.0",
+    "p-retry": "^7.1.1",
+    "pg": "^8.17.2",
+    "rss-parser": "^3.13.0",
+    "web-push": "^3.6.7",
+    "ws": "^8.19.0",
+    "zod": "^4.3.6",
+    "zod-validation-error": "^5.0.0"
+  }
+}

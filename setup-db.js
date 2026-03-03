@@ -1,5 +1,4 @@
 const { Pool } = require('pg');
-
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 async function setup() {
@@ -12,8 +11,6 @@ async function setup() {
       created_at TIMESTAMP DEFAULT NOW()
     )
   `);
-  console.log('users table created');
-
   await pool.query(`
     CREATE TABLE IF NOT EXISTS briefings (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -23,8 +20,6 @@ async function setup() {
       created_at TIMESTAMP DEFAULT NOW()
     )
   `);
-  console.log('briefings table created');
-
   await pool.query(`
     CREATE TABLE IF NOT EXISTS scheduled_times (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -34,10 +29,16 @@ async function setup() {
       created_at TIMESTAMP DEFAULT NOW()
     )
   `);
-  console.log('scheduled_times table created');
-
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS live_update_subscriptions (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID REFERENCES users(id),
+      push_subscription JSONB,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
+  console.log('All tables created!');
   await pool.end();
-  console.log('All tables created successfully!');
 }
 
 setup().catch(console.error);

@@ -10,7 +10,7 @@ const { textToSpeech } = require('./src/services/tts');
 const { startLivePoller, stopLivePoller, getLivePollerStatus } = require('./src/services/livePoller');
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 3000;
 
 const audioCache = new Map();
 const AUDIO_CACHE_TTL = 30 * 60 * 1000;

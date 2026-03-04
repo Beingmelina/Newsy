@@ -24,16 +24,29 @@ async function setup() {
     CREATE TABLE IF NOT EXISTS scheduled_times (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       user_id UUID REFERENCES users(id),
-      time TEXT,
+      schedule_times JSONB,
       timezone TEXT,
-      created_at TIMESTAMP DEFAULT NOW()
+      updated_at TIMESTAMP,
+      created_at TIMESTAMP DEFAULT NOW(),
+      UNIQUE (user_id)
     )
   `);
   await pool.query(`
     CREATE TABLE IF NOT EXISTS live_update_subscriptions (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       user_id UUID REFERENCES users(id),
-      push_subscription JSONB,
+      topic TEXT,
+      subscribed_at TIMESTAMP,
+      created_at TIMESTAMP DEFAULT NOW(),
+      UNIQUE (user_id, topic)
+    )
+  `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS push_subscriptions (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID REFERENCES users(id),
+      subscription JSONB,
+      updated_at TIMESTAMP,
       created_at TIMESTAMP DEFAULT NOW()
     )
   `);

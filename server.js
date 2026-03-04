@@ -105,7 +105,20 @@ const scheduledCronJobs = new Map();
 async function getPushSubscription(userId) {
   try {
     const result = await pool.query('SELECT subscription FROM push_subscriptions WHERE user_id = $1', [userId]);
-    return result.rows[0]?.subscription || null;
+    let sub = result.rows[0]?.subscription || null;
+    if (!sub) return null;
+
+    // Handle legacy rows where subscription was stored as a JSON string
+    if (typeof sub === 'string') {
+      try {
+        sub = JSON.parse(sub);
+      } catch (e) {
+        console.error('Failed to parse stored push subscription JSON for user:', userId, e.message);
+        return null;
+      }
+    }
+
+    return sub;
   } catch (err) {
     console.error('Error getting push subscription:', err);
     return null;
@@ -118,7 +131,7 @@ async function savePushSubscription(userId, subscription) {
       `INSERT INTO push_subscriptions (user_id, subscription, updated_at) 
        VALUES ($1, $2, NOW()) 
        ON CONFLICT (user_id) DO UPDATE SET subscription = $2, updated_at = NOW()`,
-      [userId, JSON.stringify(subscription)]
+      [userId, subscription]
     );
     return true;
   } catch (err) {

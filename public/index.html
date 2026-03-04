@@ -677,6 +677,7 @@
     <!-- Screen 8: Setup Complete -->
     <section id="s8" class="hidden" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height: 80vh;">
       <h1 class="logo">Newsy</h1>
+      <p class="subtitle" id="scheduleSummary" style="margin-bottom: 24px;"></p>
       <button class="btn btnPrimary" id="btnListenNow" style="padding: 16px 40px; font-size: 18px;">Generate my first briefing</button>
     </section>
 
@@ -1811,7 +1812,7 @@
     // Init
     (async () => {
       const isReturningUser = await loadState();
-
+      
       const params = new URLSearchParams(window.location.search);
       const liveUpdateText = params.get('liveUpdate');
       if (liveUpdateText) {
@@ -1819,7 +1820,7 @@
         showLiveAlert(liveUpdateText);
         return;
       }
-
+      
       if(isReturningUser){
         const firstName = (state.name || '').split(' ')[0];
         const capitalizedFirst = firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() : '';
@@ -1827,6 +1828,13 @@
         show('s1b');
       } else {
         show('s1');
+      }
+
+      // For returning users (including iOS PWAs), silently ensure push setup and schedules are active
+      if (state.isRegistered && 'serviceWorker' in navigator) {
+        setTimeout(() => {
+          setupNotifications({ silent: true }).catch(err => console.log('Silent notification setup failed:', err));
+        }, 200);
       }
     })();
 
@@ -1933,9 +1941,39 @@
       }
     }
 
+    function updateScheduleSummary() {
+      const el = document.getElementById('scheduleSummary');
+      if (!el) return;
+
+      const times = [];
+      for (let i = 0; i < state.briefingsPerDay; i++) {
+        if (state.briefingTimes[i]) {
+          times.push(state.briefingTimes[i]);
+        }
+      }
+
+      if (times.length === 0) {
+        el.textContent = '';
+        return;
+      }
+
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      const timeText = times.join(' and ');
+      el.textContent = `Your briefing is scheduled for ${timeText}${tz ? ` (${tz})` : ''}.`;
+    }
+
     document.getElementById('btnS7').onclick = async () => {
       state.isRegistered = true;
       saveState();
+
+      // On finishing setup, try to register push + schedule on this device (important for iOS PWAs)
+      try {
+        await setupNotifications();
+      } catch (err) {
+        console.log('Notification setup after schedule failed:', err);
+      }
+
+      updateScheduleSummary();
       show('s7b');
     };
 
@@ -1971,6 +2009,7 @@
         state.liveUpdatesDeclined = true;
         saveState();
       }
+      updateScheduleSummary();
       show('s8');
     };
 
@@ -1978,6 +2017,7 @@
       state.liveUpdatesDeclined = true;
       state.liveUpdatesSubscribed = false;
       saveState();
+      updateScheduleSummary();
       show('s8');
     };
 
@@ -2168,12 +2208,6 @@
           vibrate: [200, 100, 200, 100, 200]
         });
       }
-    }
-
-    if (state.isRegistered && 'serviceWorker' in navigator) {
-      setTimeout(() => {
-        setupNotifications({ silent: true }).catch(err => console.log('Notification setup failed:', err));
-      }, 100);
     }
 
     document.getElementById('btnLiveEnablePush').onclick = async () => {

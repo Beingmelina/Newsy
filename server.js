@@ -263,6 +263,14 @@ async function getAllScheduledUsers() {
 }
 
 async function preGenerateAndNotify(userId) {
+  // Only pre-generate audio if this user still has an active push subscription.
+  // This prevents burning ElevenLabs credits when there are no subscribers.
+  const subscription = await getPushSubscription(userId);
+  if (!subscription) {
+    console.log('[PreGen] Skipping pre-generation, no push subscription for user:', userId);
+    return;
+  }
+
   console.log('Pre-generating briefing for user:', userId);
   const prefs = await getUserPreferences(userId) || { topics: ['Politics/Geopolitics'], regions: ['Global'], publications: [] };
 

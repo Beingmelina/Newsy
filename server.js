@@ -229,7 +229,7 @@ async function saveUserPreferences(userId, prefs) {
         JSON.stringify(topics),
         JSON.stringify(regions),
         JSON.stringify(publications),
-       prefs.voiceGender, prefs.voiceAccent, prefs.briefingLength || 'short', prefs.briefingsPerDay, prefs.briefingTimes,
+        prefs.voiceGender, prefs.voiceAccent, prefs.briefingLength || 'short', prefs.briefingsPerDay, JSON.stringify(Array.isArray(prefs.briefingTimes) ? prefs.briefingTimes : Object.keys(prefs.briefingTimes || {})),
        prefs.liveUpdatesSubscribed || false, prefs.liveUpdatesDeclined || false]
     );
     return true;
@@ -305,7 +305,7 @@ async function saveScheduledTimes(userId, scheduleTimes, timezone) {
       `INSERT INTO scheduled_times (user_id, schedule_times, timezone, updated_at)
        VALUES ($1, $2, $3, NOW())
        ON CONFLICT (user_id) DO UPDATE SET schedule_times = $2, timezone = $3, updated_at = NOW()`,
-      [userId, scheduleTimes, timezone]
+       [userId, JSON.stringify(Array.isArray(scheduleTimes) ? scheduleTimes : Object.keys(scheduleTimes || {})), timezone]
     );
     return true;
   } catch (err) {

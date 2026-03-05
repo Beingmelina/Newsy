@@ -371,6 +371,23 @@ app.use((req, res, next) => {
   next();
 });
 
+// CSP that allows service workers and push notification subscriptions (worker-src, connect-src)
+app.use((req, res, next) => {
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "connect-src 'self' https: wss:",
+    "worker-src 'self' blob:",
+    "img-src 'self' data: https:",
+    "frame-ancestors 'self'",
+    "base-uri 'self'"
+  ].join("; ");
+  res.set("Content-Security-Policy", csp);
+  next();
+});
+
 let cachedArticles = [];
 
 app.post('/api/briefing', async (req, res) => {

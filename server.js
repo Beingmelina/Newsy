@@ -969,6 +969,8 @@ app.get('/api/user-state/:uuid', async (req, res) => {
 app.post('/api/user-lookup-or-create', async (req, res) => {
   try {
     const { email, name, currentId } = req.body || {};
+    console.log('User lookup/create called:', email, currentId);
+    console.log('User lookup/create called:', email, currentId);
     if (!email) {
       return res.status(400).json({ error: 'Email is required' });
     }

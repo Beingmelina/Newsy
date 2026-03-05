@@ -1012,10 +1012,10 @@ app.post('/api/user-lookup-or-create', async (req, res) => {
     // otherwise generate a fresh UUID on the server.
     const userId = currentId || crypto.randomUUID();
     await pool.query(
-      `INSERT INTO users (user_id, email, name, created_at)
-       VALUES ($1, $2, $3, NOW())
-       ON CONFLICT (user_id) DO NOTHING`,
-      [userId, email, name || '']
+      `INSERT INTO users (id, email, created_at)
+       VALUES ($1, $2, NOW())
+       ON CONFLICT (id) DO NOTHING`,
+       [userId, email]
     );
     return res.json({ found: false, userId });
   } catch (err) {

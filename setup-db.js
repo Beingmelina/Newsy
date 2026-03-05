@@ -47,7 +47,8 @@ async function setup() {
       user_id UUID REFERENCES users(id),
       subscription JSONB,
       updated_at TIMESTAMP,
-      created_at TIMESTAMP DEFAULT NOW()
+      created_at TIMESTAMP DEFAULT NOW(),
+      UNIQUE (user_id)
     )
   `);
   await pool.query(`

@@ -2189,6 +2189,7 @@
         return true;
       } catch (err) {
         console.error('Push setup failed:', err);
+        alert('Push setup error: ' + err.message);
         return false;
       }
     }

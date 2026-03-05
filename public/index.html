@@ -1341,6 +1341,7 @@
     let currentAudio = persistentAudio;
     let currentAudioUrl = null;
     let audioUnlocked = false;
+    let currentUtterance = null;
     
     // iOS requires audio to be "unlocked" by user gesture before async operations
     function unlockAudio() {
@@ -1364,6 +1365,41 @@
       });
     }
     
+    function speakWithWebSpeech(text, onStarted) {
+      if (!('speechSynthesis' in window)) {
+        throw new Error('Browser speechSynthesis API is not available');
+      }
+
+      return new Promise((resolve, reject) => {
+        try {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(text);
+          currentUtterance = utterance;
+
+          utterance.onstart = () => {
+            console.log('Web Speech: playback started');
+            if (onStarted) onStarted();
+          };
+          utterance.onend = () => {
+            console.log('Web Speech: playback ended');
+            currentUtterance = null;
+            resolve();
+          };
+          utterance.onerror = (e) => {
+            console.error('Web Speech: error', e);
+            currentUtterance = null;
+            reject(new Error('Browser text-to-speech failed'));
+          };
+
+          // Optionally map our voice settings to a browser voice here in future.
+          window.speechSynthesis.speak(utterance);
+        } catch (e) {
+          currentUtterance = null;
+          reject(e);
+        }
+      });
+    }
+
     async function playAudio(text, onStarted){
       const { voice, accent } = getVoiceSettings();
       console.log('playAudio called, text length:', text.length);
@@ -1382,7 +1418,9 @@
         if(!res.ok) {
           const errText = await res.text();
           console.error('TTS API error:', res.status, errText);
-          throw new Error('TTS failed: ' + errText);
+          // Fall back to browser Web Speech if ElevenLabs/quota fails
+          console.log('Falling back to browser speechSynthesis for audio');
+          return speakWithWebSpeech(text, onStarted);
         }
         
         const blob = await res.blob();
@@ -1390,7 +1428,8 @@
         
         if(blob.size < 100) {
           console.error('Audio blob too small, skipping');
-          throw new Error('Audio generation failed - empty response');
+          console.log('Falling back to browser speechSynthesis for audio');
+          return speakWithWebSpeech(text, onStarted);
         }
         
         if (currentAudioUrl) {
@@ -1429,7 +1468,9 @@
         });
       } catch(e) {
         console.error('playAudio error:', e);
-        throw e;
+        // Any network / quota / other failure: use built-in browser TTS as a temporary fallback
+        console.log('Falling back to browser speechSynthesis for audio due to error');
+        return speakWithWebSpeech(text, onStarted);
       }
     }
 

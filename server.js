@@ -1010,12 +1010,42 @@ app.put('/api/user-state/:uuid', async (req, res) => {
   try {
     const { uuid } = req.params;
     const s = req.body;
+
+    const toArray = (v) => {
+      // If it's already an array, keep as is
+      if (Array.isArray(v)) return v;
+
+      // If it's a Set (defensive, though Sets don't survive JSON transport)
+      if (v instanceof Set) return Array.from(v);
+
+      // If it's a JSON string, try to parse into an array
+      if (typeof v === 'string') {
+        try {
+          const parsed = JSON.parse(v);
+          if (Array.isArray(parsed)) return parsed;
+        } catch (_) {
+          // fall through to object-keys fallback below
+        }
+      }
+
+      // If it's an object, use keys as a last-resort array representation
+      if (v && typeof v === 'object') {
+        return Object.keys(v);
+      }
+
+      return [];
+    };
+
+    const topics = toArray(s.topics);
+    const regions = toArray(s.regions);
+    const outlets = toArray(s.outlets);
+
     await saveUserPreferences(uuid, {
       name: s.name || '',
       email: s.email || '',
-      topics: s.topics || [],
-      regions: s.regions || [],
-      publications: s.outlets || [],
+      topics,
+      regions,
+      publications: outlets,
       voiceGender: s.voiceGender || 'male',
       voiceAccent: s.voiceAccent || 'british',
       briefingLength: s.briefingLength || 'short',

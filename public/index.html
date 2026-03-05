@@ -974,7 +974,9 @@
             voiceAccent: state.voiceAccent,
             briefingLength: state.briefingLength,
             briefingsPerDay: state.briefingsPerDay,
-            briefingTimes: state.briefingTimes
+            briefingTimes: state.briefingTimes,
+            liveUpdatesSubscribed: state.liveUpdatesSubscribed,
+            liveUpdatesDeclined: state.liveUpdatesDeclined
           })
         }).catch(err => console.error('Server sync failed:', err));
       }

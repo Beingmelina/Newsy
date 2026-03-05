@@ -38,29 +38,43 @@ function setCachedAudio(text, voice, accent, buffer) {
   }
 }
 
-function preGenerateFullAudio(fullText, voice, accent) {
+async function preGenerateFullAudio(fullText, voice, accent) {
   if (!fullText || fullText.length === 0) return;
+
+  // Skip background audio pre-generation entirely if there are no push subscribers.
+  if (!(await hasAnyPushSubscribers())) {
+    console.log('[AudioPregen] Skipping full TTS – no push subscribers in database');
+    return;
+  }
 
   const cleanText = fullText.replace(/\n?DEEP_DIVE_TOPICS:\s*\[.*?\]\s*$/, '').trim();
   const cached = getCachedAudioByText(cleanText, voice, accent);
   if (!cached) {
     console.log(`[AudioPregen] Starting full TTS (${cleanText.length} chars)...`);
-    textToSpeech(cleanText, voice, accent).then(buffer => {
+    try {
+      const buffer = await textToSpeech(cleanText, voice, accent);
       setCachedAudio(cleanText, voice, accent, buffer);
       console.log(`[AudioPregen] Cached full audio (${cleanText.length} chars, ${buffer.length} bytes)`);
-    }).catch(err => {
+    } catch (err) {
       console.error('[AudioPregen] Failed:', err.message);
-    });
+    }
   }
 }
 
-function preGenerateFullAudioAndCache(cleanText, voice, accent, userId) {
+async function preGenerateFullAudioAndCache(cleanText, voice, accent, userId) {
   if (!cleanText || cleanText.length === 0) return;
+
+  // Skip background audio pre-generation entirely if there are no push subscribers.
+  if (!(await hasAnyPushSubscribers())) {
+    console.log('[AudioPregen] Skipping full TTS cache – no push subscribers in database');
+    return;
+  }
 
   const cached = getCachedAudioByText(cleanText, voice, accent);
   if (!cached) {
     console.log(`[AudioPregen] Starting full TTS (${cleanText.length} chars)...`);
-    textToSpeech(cleanText, voice, accent).then(async buffer => {
+    try {
+      const buffer = await textToSpeech(cleanText, voice, accent);
       setCachedAudio(cleanText, voice, accent, buffer);
       console.log(`[AudioPregen] Cached full audio (${cleanText.length} chars, ${buffer.length} bytes)`);
       if (userId) {
@@ -74,15 +88,42 @@ function preGenerateFullAudioAndCache(cleanText, voice, accent, userId) {
           console.error('[AudioPregen] DB audio save failed:', err.message);
         }
       }
-    }).catch(err => {
+    } catch (err) {
       console.error('[AudioPregen] Failed:', err.message);
-    });
+    }
   }
 }
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL
 });
+
+// Cached flag so we don't constantly hit the database just to learn there are no subscribers.
+let hasPushSubscribersCache = {
+  value: false,
+  lastChecked: 0
+};
+
+async function hasAnyPushSubscribers() {
+  const now = Date.now();
+  // Re-check at most once per minute.
+  if (now - hasPushSubscribersCache.lastChecked < 60_000) {
+    return hasPushSubscribersCache.value;
+  }
+
+  try {
+    const result = await pool.query('SELECT 1 FROM push_subscriptions LIMIT 1');
+    hasPushSubscribersCache = {
+      value: result.rowCount > 0,
+      lastChecked: now
+    };
+    return hasPushSubscribersCache.value;
+  } catch (err) {
+    console.error('Error checking push subscribers:', err.message);
+    hasPushSubscribersCache = { value: false, lastChecked: now };
+    return false;
+  }
+}
 
 pool.on('error', (err) => {
   console.error('Database pool error (non-fatal):', err.message);
@@ -768,12 +809,9 @@ app.post('/api/schedule-notifications', async (req, res) => {
     if (!userId || !scheduleTimes) {
       return res.status(400).json({ error: 'userId and scheduleTimes required' });
     }
-    
-    if (preferences) {
-      await saveUserPreferences(userId, preferences);
-      console.log('Saved preferences to database for user:', userId);
-    }
-    
+
+    // Preferences are persisted via /api/user-state. Here we only (re)schedule
+    // notification jobs and persist the schedule in scheduled_times.
     scheduleUserCronJobs(userId, scheduleTimes, timezone);
     
     await saveScheduledTimes(userId, scheduleTimes, timezone);

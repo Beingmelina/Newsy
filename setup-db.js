@@ -50,6 +50,35 @@ async function setup() {
       created_at TIMESTAMP DEFAULT NOW()
     )
   `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS user_preferences (
+      user_id UUID PRIMARY KEY,
+      name TEXT,
+      email TEXT,
+      topics JSONB,
+      regions JSONB,
+      publications JSONB,
+      voice_gender TEXT,
+      voice_accent TEXT,
+      briefing_length TEXT,
+      briefings_per_day INTEGER,
+      briefing_times JSONB,
+      live_updates_subscribed BOOLEAN DEFAULT FALSE,
+      live_updates_declined BOOLEAN DEFAULT FALSE,
+      updated_at TIMESTAMP,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS cached_briefings (
+      user_id UUID PRIMARY KEY,
+      briefing TEXT,
+      topics JSONB,
+      sections JSONB,
+      audio BYTEA,
+      generated_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
   console.log('All tables created!');
   await pool.end();
 }

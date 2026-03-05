@@ -2141,6 +2141,7 @@
       try {
         swRegistration = await navigator.serviceWorker.register('/sw.js');
         await navigator.serviceWorker.ready;
+        await new Promise(resolve => setTimeout(resolve, 1000));
         console.log('Service worker registered');
         
         const vapidRes = await fetch('/api/vapid-public-key');

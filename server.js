@@ -891,6 +891,61 @@ app.get('/api/user-state/:uuid', async (req, res) => {
   }
 });
 
+// Look up or create a user profile based on email.
+// If the email already exists, return that user's ID and full preferences so onboarding can be skipped.
+// If it doesn't, return a new or existing userId to use for this email going forward.
+app.post('/api/user-lookup-or-create', async (req, res) => {
+  try {
+    const { email, name, currentId } = req.body || {};
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    // Try to find an existing preferences row for this email (most recent if duplicates exist)
+    const existing = await pool.query(
+      `SELECT user_id FROM user_preferences WHERE email = $1 ORDER BY updated_at DESC LIMIT 1`,
+      [email]
+    );
+
+    if (existing.rows[0]) {
+      const userId = existing.rows[0].user_id;
+      const prefs = await getUserPreferences(userId);
+      if (!prefs) {
+        // Should be rare – row was deleted between queries
+        return res.json({ found: false, userId });
+      }
+
+      return res.json({
+        found: true,
+        userId,
+        state: {
+          name: prefs.name || name || '',
+          email: prefs.email || email,
+          topics: prefs.topics || [],
+          regions: prefs.regions || [],
+          outlets: prefs.publications || [],
+          voiceGender: prefs.voice_gender || 'male',
+          voiceAccent: prefs.voice_accent || 'british',
+          briefingLength: prefs.briefing_length || 'short',
+          briefingsPerDay: prefs.briefings_per_day || 1,
+          briefingTimes: prefs.briefing_times || ['08:00'],
+          isRegistered: true,
+          liveUpdatesSubscribed: prefs.live_updates_subscribed || false,
+          liveUpdatesDeclined: prefs.live_updates_declined || false
+        }
+      });
+    }
+
+    // New email – use the caller's currentId (UUID cookie) if provided,
+    // otherwise generate a fresh UUID on the server.
+    const userId = currentId || crypto.randomUUID();
+    return res.json({ found: false, userId });
+  } catch (err) {
+    console.error('User lookup/create error:', err);
+    res.status(500).json({ error: 'Failed to look up or create user' });
+  }
+});
+
 app.put('/api/user-state/:uuid', async (req, res) => {
   try {
     const { uuid } = req.params;

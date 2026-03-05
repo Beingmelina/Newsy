@@ -1851,9 +1851,55 @@
     // Navigation: New user flow
     document.getElementById('btnStart').onclick = () => show('s2');
 
-    document.getElementById('btnS2').onclick = () => {
+    document.getElementById('btnS2').onclick = async () => {
       state.name = document.getElementById('name').value.trim() || "Friend";
       state.email = document.getElementById('email').value.trim();
+      
+      // If an email is provided, ask the server if this user already exists.
+      // If so, load their preferences and skip the rest of onboarding.
+      if (state.email) {
+        try {
+          const res = await fetch('/api/user-lookup-or-create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: state.email,
+              name: state.name,
+              currentId: state.uuid || null
+            })
+          });
+          
+          if (res.ok) {
+            const data = await res.json();
+            if (data.userId) {
+              state.uuid = data.userId;
+              state.pushUserId = data.userId;
+              setCookie(UUID_COOKIE, state.uuid);
+            }
+            
+            if (data.found && data.state) {
+              applyStateFromData(data.state);
+              state.isRegistered = true;
+              saveState();
+
+              try {
+                await setupNotifications();
+              } catch (e) {
+                console.log('Notification setup for returning user failed:', e);
+              }
+
+              const firstName = (state.name || '').split(' ')[0];
+              const capitalizedFirst = firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() : '';
+              document.getElementById('greetingText').textContent = capitalizedFirst ? `Hello, ${capitalizedFirst}!` : 'Hello!';
+              show('s1b');
+              return;
+            }
+          }
+        } catch (err) {
+          console.error('User lookup failed, continuing onboarding:', err);
+        }
+      }
+
       saveState();
       renderTopics();
       show('s4');

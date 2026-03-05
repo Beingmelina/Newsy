@@ -222,7 +222,13 @@ async function saveUserPreferences(userId, prefs) {
          name = $2, email = $3, topics = $4, regions = $5, publications = $6, 
          voice_gender = $7, voice_accent = $8, briefing_length = $9, briefings_per_day = $10, briefing_times = $11,
          live_updates_subscribed = $12, live_updates_declined = $13, updated_at = NOW()`,
-      [userId, prefs.name, prefs.email, topics, regions, publications, 
+      [
+        userId,
+        prefs.name,
+        prefs.email,
+        JSON.stringify(topics),
+        JSON.stringify(regions),
+        JSON.stringify(publications),
        prefs.voiceGender, prefs.voiceAccent, prefs.briefingLength || 'short', prefs.briefingsPerDay, prefs.briefingTimes,
        prefs.liveUpdatesSubscribed || false, prefs.liveUpdatesDeclined || false]
     );
@@ -262,7 +268,13 @@ async function saveCachedBriefing(userId, briefing, topics, sections, audio) {
       `INSERT INTO cached_briefings (user_id, briefing, topics, sections, audio, generated_at)
        VALUES ($1, $2, $3, $4, $5, NOW())
        ON CONFLICT (user_id) DO UPDATE SET briefing = $2, topics = $3, sections = $4, audio = $5, generated_at = NOW()`,
-      [userId, briefing, topics, JSON.stringify(sections), audio]
+      [
+        userId,
+        briefing,
+        JSON.stringify(topics || []),
+        JSON.stringify(sections || []),
+        audio
+      ]
     );
     return true;
   } catch (err) {

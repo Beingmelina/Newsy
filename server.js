@@ -160,6 +160,20 @@ async function getUserPreferences(userId) {
 
 async function saveUserPreferences(userId, prefs) {
   try {
+    // Ensure topics / regions / publications are plain JSON arrays, not Sets or other objects.
+    const toJsonArray = (value, fallback = []) => {
+      if (Array.isArray(value)) return value;
+      if (value instanceof Set) return Array.from(value);
+      if (value && typeof value === 'object' && Symbol.iterator in value) {
+        return Array.from(value);
+      }
+      return fallback;
+    };
+
+    const topics = toJsonArray(prefs.topics);
+    const regions = toJsonArray(prefs.regions);
+    const publications = toJsonArray(prefs.publications);
+
     await pool.query(
       `INSERT INTO user_preferences (user_id, name, email, topics, regions, publications, voice_gender, voice_accent, briefing_length, briefings_per_day, briefing_times, live_updates_subscribed, live_updates_declined, updated_at)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
@@ -167,7 +181,7 @@ async function saveUserPreferences(userId, prefs) {
          name = $2, email = $3, topics = $4, regions = $5, publications = $6, 
          voice_gender = $7, voice_accent = $8, briefing_length = $9, briefings_per_day = $10, briefing_times = $11,
          live_updates_subscribed = $12, live_updates_declined = $13, updated_at = NOW()`,
-      [userId, prefs.name, prefs.email, prefs.topics, prefs.regions, prefs.publications, 
+      [userId, prefs.name, prefs.email, topics, regions, publications, 
        prefs.voiceGender, prefs.voiceAccent, prefs.briefingLength || 'short', prefs.briefingsPerDay, prefs.briefingTimes,
        prefs.liveUpdatesSubscribed || false, prefs.liveUpdatesDeclined || false]
     );

@@ -2628,6 +2628,17 @@
     });
     document.getElementById('btnSaveVoice').onclick = () => {
       saveState();
+      if (isPlaying && persistentAudio) {
+        persistentAudio.pause();
+        isPlaying = false;
+      }
+      if (currentAudioUrl) {
+        URL.revokeObjectURL(currentAudioUrl);
+        currentAudioUrl = null;
+      }
+      const btn = document.getElementById('btnPlay');
+      btn.textContent = 'Play briefing';
+      btn.disabled = false;
       show('s11');
     };
 

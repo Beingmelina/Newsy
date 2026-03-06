@@ -215,8 +215,8 @@ async function pollForBreakingNews(sendNotificationCallback) {
       if (status === 'UNCONFIRMED') prefix = 'Unconfirmed';
       
       let body = `Via ${article.source}`;
-      if (status === 'DEVELOPING') body = `Developing story — not yet verified. Via ${article.source}`;
-      if (status === 'UNCONFIRMED') body = `Unconfirmed — single source report. Via ${article.source}`;
+      if (status === 'DEVELOPING') body = `Developing story. Via ${article.source}`;
+if (status === 'UNCONFIRMED') body = `Via ${article.source}`;
       
       console.log(`  - [${status}] ${article.source}: ${article.title}`);
       try {

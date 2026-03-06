@@ -786,7 +786,10 @@ app.post('/api/push-subscribe', async (req, res) => {
     if (!subscription || !userId) {
       return res.status(400).json({ error: 'Subscription and userId required' });
     }
-    await savePushSubscription(userId, subscription);
+    const saved = await savePushSubscription(userId, subscription);
+    if (!saved) {
+      return res.status(403).json({ error: 'Please register with your email to activate this feature.' });
+    }
     console.log('Push subscription saved to database for user:', userId);
     res.json({ success: true });
   } catch (error) {

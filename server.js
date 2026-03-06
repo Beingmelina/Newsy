@@ -1036,12 +1036,11 @@ app.post('/api/user-lookup-or-create', async (req, res) => {
       });
     }
 
-    // New email – use the caller's currentId (UUID cookie) if provided,
-    // otherwise generate a fresh UUID on the server.
-    const userId = currentId || crypto.randomUUID();
+    // Always generate a fresh server-side UUID — never trust the client's cookie ID.
+    const userId = crypto.randomUUID();
     try {
       const insertResult = await pool.query(
-        `INSERT INTO users (id, email, created_at) VALUES ($1, $2, NOW()) ON CONFLICT (id) DO NOTHING`,
+        `INSERT INTO users (id, email, created_at) VALUES ($1, $2, NOW()) ON CONFLICT (email) DO UPDATE SET email = $2 RETURNING id`,
         [userId, email]
       );
       console.log('User insert result:', insertResult.rowCount, 'rows, userId:', userId);

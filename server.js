@@ -168,11 +168,15 @@ async function getPushSubscription(userId) {
 
 async function savePushSubscription(userId, subscription) {
   try {
-    // Ensure user exists in users table before saving subscription
-    await pool.query(
-      `INSERT INTO users (id, email, created_at) VALUES ($1, '', NOW()) ON CONFLICT (id) DO NOTHING`,
+    // Only save subscription if user already exists with a real email
+    const userCheck = await pool.query(
+      `SELECT id FROM users WHERE id = $1 AND email != '' AND email IS NOT NULL`,
       [userId]
     );
+    if (userCheck.rowCount === 0) {
+      console.log('Push subscription rejected — no registered user found for:', userId);
+      return false;
+    }
     await pool.query(
       `INSERT INTO push_subscriptions (user_id, subscription, updated_at)
        VALUES ($1, $2, NOW())
@@ -878,10 +882,14 @@ app.post('/api/subscribe-live-updates', async (req, res) => {
     if (!userId || !topic) {
       return res.status(400).json({ error: 'userId and topic required' });
     }
-    await pool.query(
-      `INSERT INTO users (id, email, created_at) VALUES ($1, '', NOW()) ON CONFLICT (id) DO NOTHING`,
+    const userCheck = await pool.query(
+      `SELECT id FROM users WHERE id = $1 AND email != '' AND email IS NOT NULL`,
       [userId]
     );
+    if (userCheck.rowCount === 0) {
+      console.log('Live update subscription rejected — no registered user found for:', userId);
+      return res.status(403).json({ error: 'Please register with your email to activate this feature.' });
+    }
     await pool.query(
       `INSERT INTO live_update_subscriptions (user_id, topic, subscribed_at)
        VALUES ($1, $2, NOW())

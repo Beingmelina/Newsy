@@ -618,9 +618,15 @@ app.post('/api/briefing-stream', async (req, res) => {
             .catch(err => console.error('Failed to cache on-demand briefing:', err.message));
         }
 
-        if (voice && accent) {
-          const cleanTextForAudio = fullText.replace(/\n?DEEP_DIVE_TOPICS:\s*\[.*?\]\s*$/, '').trim();
-          preGenerateFullAudioAndCache(cleanTextForAudio, voice, accent, userId);
+        if (voice && accent && userId) {
+          getPushSubscription(userId).then(subscription => {
+            if (subscription) {
+              const cleanTextForAudio = fullText.replace(/\n?DEEP_DIVE_TOPICS:\s*\[.*?\]\s*$/, '').trim();
+              preGenerateFullAudioAndCache(cleanTextForAudio, voice, accent, userId);
+            } else {
+              console.log('[AudioPregen] Skipping on-demand audio pre-gen — no push subscription for user:', userId);
+            }
+          });
         }
       } else if (chunk.type === 'error') {
         res.write(`data: ${JSON.stringify({ type: 'error', message: chunk.data })}\n\n`);

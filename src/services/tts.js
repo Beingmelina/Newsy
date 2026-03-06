@@ -1,8 +1,13 @@
 const VOICE_MAP = {
-  'male-american': 'nPczCjzI2devNBz1zQrb',
-  'male-british': 'Z7rMwyCsIFBOJYGA90x5',
-  'female-american': 'GyAmfuVW0xquOSDB3g94',
   'female-british': 'khYwAWwYSjlxlcrwGQ16',
+  'female-american': 'GyAmfuVW0xquOSDB3g94',
+  'female-indian': 'v94rb3DMOvQwADJySFrY',
+  'female-south-african': 'gsm4lUH9bnZ3pjR1Pw7w',
+  'male-british': 'VsQmyFHffusQDewmHB5v',
+  'male-american': 'nPczCjzI2devNBz1zQrb',
+  'male-middle-eastern': 'puDRtQWF8NtQiPMJygTb',
+  'male-indian': 'Hq6EwBRAX1WbS8MuCZtT',
+  'male-pirate': 'PPzYpIqttlTYA83688JI',
   'ash': 'nPczCjzI2devNBz1zQrb',
   'coral': 'GyAmfuVW0xquOSDB3g94',
 };

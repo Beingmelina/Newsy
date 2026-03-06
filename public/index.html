@@ -608,16 +608,17 @@
 
       <div class="sectionDivider"></div>
 
-      <p class="fieldLabel">Accent</p>
-      <div class="radioGroup" id="accentGroup">
-        <label class="radioOpt">
-          <input type="radio" name="voiceAccent" value="american" />
-          <span>American</span>
-        </label>
-        <label class="radioOpt">
-          <input type="radio" name="voiceAccent" value="british" checked />
-          <span>British</span>
-        </label>
+      <p class="fieldLabel">Choose your voice</p>
+      <div class="stack" id="voiceGrid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="seg" data-voice="female-british" role="button" tabindex="0">Female British</div>
+        <div class="seg" data-voice="female-american" role="button" tabindex="0">Female American</div>
+        <div class="seg" data-voice="female-indian" role="button" tabindex="0">Female Indian</div>
+        <div class="seg" data-voice="female-south-african" role="button" tabindex="0">Female South African</div>
+        <div class="seg" data-voice="male-british" role="button" tabindex="0">Male British</div>
+        <div class="seg" data-voice="male-american" role="button" tabindex="0">Male American</div>
+        <div class="seg" data-voice="male-middle-eastern" role="button" tabindex="0">Male Middle Eastern</div>
+        <div class="seg" data-voice="male-indian" role="button" tabindex="0">Male Indian</div>
+        <div class="seg" data-voice="male-pirate" role="button" tabindex="0">Male Pirate</div>
       </div>
 
       <div class="row">
@@ -1160,13 +1161,8 @@
     }
 
     function getVoiceSettings(){
-      let voice = 'ash';
-      if(state.voiceGender === 'male'){
-        voice = 'ash';
-      } else {
-        voice = 'coral';
-      }
-      return { voice, accent: state.voiceAccent };
+      const voice = state.voiceAccent || 'male-british';
+      return { voice, accent: 'american' };
     }
 
     function splitTextIntoSections(text) {
@@ -1962,12 +1958,19 @@
 
     document.getElementById('btnS6Back').onclick = () => { renderRegions(); show('s5'); };
     document.getElementById('btnS6').onclick = () => {
-      state.voiceGender = document.querySelector('input[name="voiceGender"]:checked')?.value || 'male';
-      state.voiceAccent = document.querySelector('input[name="voiceAccent"]:checked')?.value || 'american';
       saveState();
       updateLengthSelection('s6b');
       show('s6b');
     };
+
+    document.getElementById('voiceGrid').querySelectorAll('.seg[data-voice]').forEach(seg => {
+      seg.onclick = () => {
+        document.getElementById('voiceGrid').querySelectorAll('.seg[data-voice]').forEach(s => s.classList.remove('active'));
+        seg.classList.add('active');
+        state.voiceAccent = seg.dataset.voice;
+        saveState();
+      };
+    });
 
     document.getElementById('s6b').querySelectorAll('.seg[data-length]').forEach(seg => {
       seg.onclick = () => {

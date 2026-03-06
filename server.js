@@ -1013,12 +1013,15 @@ app.post('/api/user-lookup-or-create', async (req, res) => {
     // New email – use the caller's currentId (UUID cookie) if provided,
     // otherwise generate a fresh UUID on the server.
     const userId = currentId || crypto.randomUUID();
-    await pool.query(
-      `INSERT INTO users (id, email, created_at)
-       VALUES ($1, $2, NOW())
-       ON CONFLICT (id) DO NOTHING`,
-       [userId, email]
-    );
+    try {
+      const insertResult = await pool.query(
+        `INSERT INTO users (id, email, created_at) VALUES ($1, $2, NOW()) ON CONFLICT (id) DO NOTHING`,
+        [userId, email]
+      );
+      console.log('User insert result:', insertResult.rowCount, 'rows, userId:', userId);
+    } catch(insertErr) {
+      console.log('User insert FAILED:', insertErr.message);
+    }
     return res.json({ found: false, userId });
   } catch (err) {
     console.error('User lookup/create error:', err);

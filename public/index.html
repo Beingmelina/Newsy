@@ -1823,7 +1823,21 @@
 
       // For returning users (including iOS PWAs), silently ensure push setup and schedules are active
       if (state.isRegistered && 'serviceWorker' in navigator) {
-        setTimeout(() => {
+        setTimeout(async () => {
+          await fetch('/api/user-lookup-or-create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: state.email, name: state.name, currentId: state.uuid || null })
+          }).then(async res => {
+            if (res.ok) {
+              const data = await res.json();
+              if (data.userId) {
+                state.uuid = data.userId;
+                state.pushUserId = data.userId;
+                setCookie(UUID_COOKIE, state.uuid);
+              }
+            }
+          }).catch(err => console.log('Silent user lookup failed:', err));
           setupNotifications({ silent: true }).catch(err => console.log('Silent notification setup failed:', err));
         }, 200);
       }

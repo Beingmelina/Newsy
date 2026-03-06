@@ -168,9 +168,14 @@ async function getPushSubscription(userId) {
 
 async function savePushSubscription(userId, subscription) {
   try {
+    // Ensure user exists in users table before saving subscription
     await pool.query(
-      `INSERT INTO push_subscriptions (user_id, subscription, updated_at) 
-       VALUES ($1, $2, NOW()) 
+      `INSERT INTO users (id, email, created_at) VALUES ($1, '', NOW()) ON CONFLICT (id) DO NOTHING`,
+      [userId]
+    );
+    await pool.query(
+      `INSERT INTO push_subscriptions (user_id, subscription, updated_at)
+       VALUES ($1, $2, NOW())
        ON CONFLICT (user_id) DO UPDATE SET subscription = $2, updated_at = NOW()`,
       [userId, subscription]
     );

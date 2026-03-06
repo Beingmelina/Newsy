@@ -20,9 +20,7 @@ async function textToSpeech(text, voice = 'ash', accent = 'american') {
     throw new Error('ELEVENLABS_API_KEY environment variable not set');
   }
 
-  const gender = (voice === 'coral') ? 'female' : 'male';
-  const voiceKey = `${gender}-${accent}`;
-  const voiceId = VOICE_MAP[voiceKey] || VOICE_MAP[voice] || VOICE_MAP['ash'];
+  const voiceId = VOICE_MAP[voice] || VOICE_MAP['male-british'];
 
   const response = await fetch(
     `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,

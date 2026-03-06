@@ -2165,7 +2165,8 @@
     }
 
     async function scheduleAllBriefings() {
-      if (!state.pushUserId) return;
+      if (!state.uuid && !state.pushUserId) return;
+      state.pushUserId = state.uuid || state.pushUserId;
       
       const scheduleTimes = [];
       for (let i = 0; i < state.briefingsPerDay; i++) {

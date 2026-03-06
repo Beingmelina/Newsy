@@ -2102,17 +2102,16 @@
         }
         
         let subscription = await swRegistration.pushManager.getSubscription();
-        
-        if (!subscription) {
-          const convertedKey = urlBase64ToUint8Array(publicKey);
-          subscription = await swRegistration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: convertedKey
-          });
-          console.log('New push subscription created');
-        } else {
-          console.log('Using existing push subscription');
+        if (subscription) {
+          await subscription.unsubscribe();
+          console.log('Unsubscribed existing push subscription to force refresh');
         }
+        const convertedKey = urlBase64ToUint8Array(publicKey);
+        subscription = await swRegistration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: convertedKey
+        });
+        console.log('New push subscription created');
         
         const userId = state.uuid;
         try {

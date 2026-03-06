@@ -1902,10 +1902,7 @@
     document.getElementById('btnS4').onclick = () => { renderRegions(); show('s5'); };
 
     document.getElementById('btnS5Back').onclick = () => { renderTopics(); show('s4'); };
-    document.getElementById('btnS5').onclick = () => {
-      updateVoiceRadios('genderGroup', 'accentGroup');
-      show('s6');
-    };
+    document.getElementById('btnS5').onclick = () => { document.getElementById('voiceGrid').querySelectorAll('.seg[data-voice]').forEach(s => { s.classList.toggle('active', s.dataset.voice === state.voiceAccent); }); show('s6'); };
 
     document.getElementById('btnS6Back').onclick = () => { renderRegions(); show('s5'); };
     document.getElementById('btnS6').onclick = () => {
@@ -1936,10 +1933,7 @@
       renderScheduleUI('scheduleTimesContainer', 's7');
       show('s7');
     };
-    document.getElementById('btnS6bBack').onclick = () => {
-      updateVoiceRadios('genderGroup', 'accentGroup');
-      show('s6');
-    };
+    document.getElementById('btnS6bBack').onclick = () => { document.getElementById('voiceGrid').querySelectorAll('.seg[data-voice]').forEach(s => { s.classList.toggle('active', s.dataset.voice === state.voiceAccent); }); show('s6'); };
     document.getElementById('btnS7Back').onclick = () => {
       updateLengthSelection('s6b');
       show('s6b');

@@ -879,6 +879,10 @@ app.post('/api/subscribe-live-updates', async (req, res) => {
       return res.status(400).json({ error: 'userId and topic required' });
     }
     await pool.query(
+      `INSERT INTO users (id, email, created_at) VALUES ($1, '', NOW()) ON CONFLICT (id) DO NOTHING`,
+      [userId]
+    );
+    await pool.query(
       `INSERT INTO live_update_subscriptions (user_id, topic, subscribed_at)
        VALUES ($1, $2, NOW())
        ON CONFLICT (user_id, topic) DO UPDATE SET subscribed_at = NOW()`,

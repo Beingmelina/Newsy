@@ -1881,7 +1881,7 @@
     };
 
     // Navigation: New user flow
-    document.getElementById('btnStart').onclick = () => show('s2');
+    document.getElementById('btnStart').onclick = () => { showA2HS(); show('s2'); };
 
     document.getElementById('btnS2').onclick = async () => {
       state.name = document.getElementById('name').value.trim() || "Friend";
@@ -2888,7 +2888,6 @@
       document.getElementById('a2hsOverlay').style.display = 'none';
     }
 
-    setTimeout(showA2HS, 1500);
   </script>
 </body>
 </html>

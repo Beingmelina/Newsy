@@ -1,4 +1,4 @@
-const CACHE_NAME = 'newsy-v3';
+const CACHE_NAME = 'newsy-v4';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

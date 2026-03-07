@@ -2857,11 +2857,10 @@
 
     function showA2HS() {
       if (isStandalone()) return;
-      if (!isIOS() && !isAndroid()) return;
       if (localStorage.getItem(A2HS_DISMISSED_KEY) === 'true') return;
 
       const shownCount = parseInt(localStorage.getItem(A2HS_KEY) || '0');
-      if (shownCount >= 2 && localStorage.getItem(A2HS_DISMISSED_KEY) !== 'true') {
+      if (shownCount >= 2) {
         localStorage.setItem(A2HS_DISMISSED_KEY, 'true');
         return;
       }

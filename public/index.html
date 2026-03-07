@@ -1766,21 +1766,34 @@
       return res.json();
     }
 
-    const liveAlertHistory = [];
-    function showLiveAlert(alertText) {
-      const now = new Date();
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' };
-      const timestamp = now.toLocaleDateString('en-US', options);
-      liveAlertHistory.unshift({ text: alertText, time: timestamp });
+    async function showLiveAlert() {
       const feed = document.getElementById('liveAlertFeed');
-      feed.innerHTML = '';
-      for (const item of liveAlertHistory) {
-        const card = document.createElement('div');
-        card.style.cssText = 'background:#f5f5f5; border-radius:8px; padding:14px 16px; border-left:3px solid #000;';
-        card.innerHTML = `<p style="font-size:12px; color:#888; margin:0 0 6px 0;">${item.time}</p><p style="font-size:15px; color:#111; margin:0; line-height:1.5;">${item.text}</p>`;
-        feed.appendChild(card);
-      }
+      feed.innerHTML = '<p style="font-size:14px; color:#888; text-align:center; margin-top:24px;">Loading alerts...</p>';
       show('sLiveAlert');
+      try {
+        const res = await fetch('/api/live-alerts');
+        const data = await res.json();
+        feed.innerHTML = '';
+        if (!data.alerts || data.alerts.length === 0) {
+          feed.innerHTML = '<p style="font-size:14px; color:#888; text-align:center; margin-top:24px;">No alerts yet.</p>';
+          return;
+        }
+        for (const item of data.alerts) {
+          const date = new Date(item.created_at);
+          const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' };
+          const timestamp = date.toLocaleDateString('en-US', options);
+          const card = document.createElement('div');
+          card.style.cssText = 'background:#f5f5f5; border-radius:8px; padding:14px 16px; border-left:3px solid #000;';
+          const rawTitle = item.title || '';
+          const headline = rawTitle.replace(/^(Breaking|Developing|Unconfirmed):\s*/i, '').trim();
+          const source = item.source || '';
+          card.innerHTML = `<p style="font-size:12px; color:#888; margin:0 0 6px 0;">${timestamp}</p><p style="font-size:15px; color:#111; margin:0; line-height:1.5;">${headline}${source ? ' - ' + source : ''}</p>`;
+          feed.appendChild(card);
+        }
+      } catch (err) {
+        console.error('Failed to fetch live alerts:', err);
+        feed.innerHTML = '<p style="font-size:14px; color:#c00; text-align:center; margin-top:24px;">Failed to load alerts.</p>';
+      }
     }
     document.getElementById('btnLiveAlertHome').onclick = () => {
       const firstName = (state.name || '').split(' ')[0];
@@ -1794,8 +1807,10 @@
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data && event.data.type === 'live-update') {
-          showLiveAlert(event.data.title + ': ' + event.data.body);
+        if (event.data && event.data.type === 'show-notifications') {
+          showLiveAlert();
+        } else if (event.data && event.data.type === 'show-briefing') {
+          show('s2');
         }
       });
     }
@@ -1805,10 +1820,9 @@
       const isReturningUser = await loadState();
       
       const params = new URLSearchParams(window.location.search);
-      const liveUpdateText = params.get('liveUpdate');
-      if (liveUpdateText) {
+      if (params.get('notifications') !== null) {
         window.history.replaceState({}, '', '/');
-        showLiveAlert(liveUpdateText);
+        showLiveAlert();
         return;
       }
       

@@ -1147,11 +1147,28 @@ async function sendLiveUpdateToSubscribers({ title, body, topic }) {
     }
     if (sent > 0) {
       console.log(`[LiveUpdate] Sent to ${sent}/${subscribers.rows.length} subscribers: ${title}`);
+      const source = (body || '').replace(/^(Developing story\. Via |Via )/, '').trim();
+      await pool.query(
+        `INSERT INTO live_alerts (title, source) VALUES ($1, $2)`,
+        [title, source]
+      );
     }
   } catch (err) {
     console.error('[LiveUpdate] Send error:', err.message);
   }
 }
+
+app.get('/api/live-alerts', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT title, source, created_at FROM live_alerts ORDER BY created_at DESC LIMIT 50`
+    );
+    res.json({ alerts: result.rows });
+  } catch (err) {
+    console.error('[LiveAlerts] Fetch error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch alerts' });
+  }
+});
 
 app.get('/api/live-poller-status', (req, res) => {
   res.json(getLivePollerStatus());

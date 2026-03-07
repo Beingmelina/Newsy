@@ -41,21 +41,12 @@ self.addEventListener('notificationclick', (event) => {
 
   const tag = event.notification.tag || '';
   const isLiveUpdate = tag.startsWith('live-update-');
-  const body = event.notification.body || '';
-  const title = event.notification.title || 'Newsy';
-
-  let url = '/';
-  if (isLiveUpdate && body) {
-    url = '/?liveUpdate=' + encodeURIComponent(title + ': ' + body);
-  }
-
+  const url = isLiveUpdate ? '/?notifications' : '/';
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
         if (client.url.includes(self.location.origin) && 'focus' in client) {
-          if (isLiveUpdate && body) {
-            client.postMessage({ type: 'live-update', title, body });
-          }
+          client.postMessage({ type: isLiveUpdate ? 'show-notifications' : 'show-briefing' });
           return client.focus();
         }
       }

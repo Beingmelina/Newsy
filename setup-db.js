@@ -80,6 +80,14 @@ async function setup() {
       generated_at TIMESTAMP DEFAULT NOW()
     )
   `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS live_alerts (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      title TEXT,
+      source TEXT,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
   console.log('All tables created!');
   await pool.end();
 }

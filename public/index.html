@@ -835,6 +835,18 @@
       <button class="btn btnAlt btnFull" id="btnFeedbackBack" style="margin-top: 12px;">Back</button>
     </section>
 
+  <!-- Add to Home Screen Popup -->
+  <div id="a2hsOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; align-items:flex-end; justify-content:center;">
+    <div style="background:#fff; border:3px solid #000; border-bottom:none; width:100%; max-width:480px; padding:28px 28px 32px; display:flex; flex-direction:column; gap:20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <p style="margin:0; font-size:18px; font-weight:700;">Add Newsy to your Home Screen</p>
+        <button type="button" id="a2hsClose" style="background:none; border:none; font-size:24px; cursor:pointer; padding:0 8px;" aria-label="Close">×</button>
+      </div>
+      <p style="margin:0; font-size:14px; color:#333;">For the best experience and push notifications, add this app to your home screen.</p>
+      <button type="button" class="btn btnPrimary" id="a2hsInstall" style="display:none;">Add to Home Screen</button>
+    </div>
+  </div>
+
   </div>
 
   <script>
@@ -2796,6 +2808,87 @@
     document.getElementById('btnFeedbackBack').onclick = () => {
       show('s11');
     };
+  </script>
+
+  <script>
+    const A2HS_KEY = 'a2hs_shown_count';
+    const A2HS_DISMISSED_KEY = 'a2hs_dismissed';
+
+    const iosSteps = [
+      { text: 'Tap the <strong>Share button</strong> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin:0 2px;"><path d="M12 15V3"/><path d="M7 8L12 3L17 8"/><path d="M3 15v5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5"/></svg> or the <strong>3 dots</strong> <span style="font-size:16px;font-weight:900;letter-spacing:2px;">•••</span> at the bottom of your screen' },
+      { text: 'Tap <strong>Share</strong> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin:0 2px;"><path d="M12 15V3"/><path d="M7 8L12 3L17 8"/><path d="M3 15v5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5"/></svg>' },
+      { text: 'Scroll down and tap <strong>Add to Home Screen</strong>' },
+      { text: 'Tap <strong>Add</strong> in the top right corner' },
+      { text: '<strong>Close this tab</strong> and open <strong>Newsy</strong> from your Home Screen' }
+    ];
+
+    const androidSteps = [
+      { text: 'Tap the <strong>3 dots</strong> <span style="font-size:16px;font-weight:900;letter-spacing:2px;">⋮</span> in the top right of your browser' },
+      { text: 'Tap <strong>Add to Home Screen</strong>' },
+      { text: 'Tap <strong>Add</strong> to confirm' },
+      { text: '<strong>Close this tab</strong> and open <strong>Newsy</strong> from your Home Screen' }
+    ];
+
+    function isIOS() {
+      return /iphone|ipad|ipod/i.test(navigator.userAgent);
+    }
+
+    function isAndroid() {
+      return /android/i.test(navigator.userAgent);
+    }
+
+    function isStandalone() {
+      return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+    }
+
+    function buildA2HSSteps(steps) {
+      const container = document.getElementById('a2hsSteps');
+      container.innerHTML = '';
+      steps.forEach((step, i) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex; align-items:flex-start; gap:14px;';
+        row.innerHTML = `
+          <div style="flex-shrink:0;width:28px;height:28px;background:#000;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;">${i + 1}</div>
+          <div style="font-size:15px;color:#111;line-height:1.5;padding-top:3px;">${step.text}</div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function showA2HS() {
+      if (isStandalone()) return;
+      if (!isIOS() && !isAndroid()) return;
+      if (localStorage.getItem(A2HS_DISMISSED_KEY) === 'true') return;
+
+      const shownCount = parseInt(localStorage.getItem(A2HS_KEY) || '0');
+      if (shownCount >= 2 && localStorage.getItem(A2HS_DISMISSED_KEY) !== 'true') {
+        localStorage.setItem(A2HS_DISMISSED_KEY, 'true');
+        return;
+      }
+
+      const steps = isIOS() ? iosSteps : androidSteps;
+      buildA2HSSteps(steps);
+
+      if (shownCount >= 1) {
+        document.getElementById('a2hsDontShow').style.display = 'block';
+      }
+
+      localStorage.setItem(A2HS_KEY, shownCount + 1);
+
+      const overlay = document.getElementById('a2hsOverlay');
+      overlay.style.display = 'flex';
+    }
+
+    function closeA2HS() {
+      document.getElementById('a2hsOverlay').style.display = 'none';
+    }
+
+    function dismissA2HSForever() {
+      localStorage.setItem(A2HS_DISMISSED_KEY, 'true');
+      document.getElementById('a2hsOverlay').style.display = 'none';
+    }
+
+    setTimeout(showA2HS, 1500);
   </script>
 </body>
 </html>

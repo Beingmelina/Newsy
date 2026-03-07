@@ -822,6 +822,7 @@
         <button class="btn btnAlt" id="btnEditLiveNo">No</button>
       </div>
 
+      <button class="btn btnPrimary btnFull hidden" id="btnDisableLiveUpdates" style="margin-top: 18px;">Disable Live Updates</button>
       <button class="btn btnAlt btnFull" id="btnEditLiveBack" style="margin-top: 18px;">Back</button>
     </section>
 
@@ -2707,12 +2708,15 @@
     document.getElementById('btnEditLiveUpdates').onclick = () => {
       const statusEl = document.getElementById('liveUpdatesEditStatus');
       const btnsEl = document.getElementById('liveUpdatesEditBtns');
+      const disableBtn = document.getElementById('btnDisableLiveUpdates');
       if (state.liveUpdatesSubscribed) {
         statusEl.classList.remove('hidden');
         btnsEl.style.display = 'none';
+        disableBtn.classList.remove('hidden');
       } else {
         statusEl.classList.add('hidden');
         btnsEl.style.display = '';
+        disableBtn.classList.add('hidden');
       }
       show('sEditLiveUpdates');
     };
@@ -2736,6 +2740,7 @@
       saveState();
       document.getElementById('liveUpdatesEditStatus').classList.remove('hidden');
       document.getElementById('liveUpdatesEditBtns').style.display = 'none';
+      document.getElementById('btnDisableLiveUpdates').classList.remove('hidden');
     };
 
     document.getElementById('btnEditLiveNo').onclick = () => {
@@ -2743,6 +2748,15 @@
       state.liveUpdatesDeclined = true;
       saveState();
       show('s11');
+    };
+
+    document.getElementById('btnDisableLiveUpdates').onclick = () => {
+      state.liveUpdatesSubscribed = false;
+      state.liveUpdatesDeclined = true;
+      saveState();
+      document.getElementById('liveUpdatesEditStatus').classList.add('hidden');
+      document.getElementById('liveUpdatesEditBtns').style.display = '';
+      document.getElementById('btnDisableLiveUpdates').classList.add('hidden');
     };
 
     document.getElementById('btnEditLiveBack').onclick = () => {

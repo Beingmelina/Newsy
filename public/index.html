@@ -125,6 +125,7 @@
       flex-direction: column;
       max-width: 100%;
       overflow-x: hidden;
+      position: relative;
     }
 
     .frame section .logo{
@@ -693,6 +694,7 @@
 
     <!-- Screen 10: Deep Dive output -->
     <section id="s10" class="hidden">
+      <button class="settingsBtn" id="btnSettingsDeepDive" title="Settings"><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
       <h1 class="logo">Newsy</h1>
       <p class="instruction">Deep dive</p>
 
@@ -2534,7 +2536,7 @@
         state.currentDeepDiveTopic = selected.join(', ');
         const data = await generateDeepDive(selected, state.lastBriefingText);
         state.currentDeepDiveText = data.deepDive;
-        document.getElementById('deepDiveText').textContent = data.deepDive;
+        renderDeepDiveText('deepDiveText', data.deepDive);
       } catch(e) {
         document.getElementById('deepDiveText').textContent = 'Error generating deep dive.';
       }
@@ -2610,7 +2612,7 @@
         
         const data = await res.json();
         state.currentDeepDiveText = data.deeperDive;
-        document.getElementById('deepDiveText').textContent = data.deeperDive;
+        renderDeepDiveText('deepDiveText', data.deeperDive);
         btn.style.display = 'none';
       } catch(e) {
         console.error('Deeper dive error:', e);
@@ -2623,9 +2625,19 @@
 
     document.getElementById('btnBackToBriefing').onclick = () => show('s9');
 
+    function renderDeepDiveText(elementId, text) {
+      const el = document.getElementById(elementId);
+      const html = text
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+      el.innerHTML = '<p>' + html + '</p>';
+    }
+
     // Settings
     document.getElementById('btnSettings').onclick = () => show('s11');
     document.getElementById('btnSettingsBriefing').onclick = () => show('s11');
+    document.getElementById('btnSettingsDeepDive').onclick = () => show('s11');
     document.getElementById('btnBackToBriefingFromSettings').onclick = () => show('s9');
     document.getElementById('btnSettingsBack').onclick = () => {
       const firstName = (state.name || '').split(' ')[0];

@@ -1160,6 +1160,7 @@ async function sendLiveUpdateToSubscribers({ title, body, topic }) {
 
 app.get('/api/live-alerts', async (req, res) => {
   try {
+    res.set('Cache-Control', 'no-store');
     const result = await pool.query(
       `SELECT title, source, created_at FROM live_alerts ORDER BY created_at DESC LIMIT 50`
     );

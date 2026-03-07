@@ -433,9 +433,9 @@
     }
 
     .settingsBtn{
-      position: fixed;
+      position: absolute;
       top: 20px;
-      right: calc((100% - min(900px, calc(100% - 24px))) / 2 + 12px);
+      right: 20px;
       background: none;
       border: none;
       cursor: pointer;
@@ -1789,8 +1789,10 @@
       const feed = document.getElementById('liveAlertFeed');
       feed.innerHTML = '<p style="font-size:14px; color:#888; text-align:center; margin-top:24px;">Loading alerts...</p>';
       show('sLiveAlert');
+      if (window._liveAlertInterval) clearInterval(window._liveAlertInterval);
+      window._liveAlertInterval = setInterval(showLiveAlert, 30000);
       try {
-        const res = await fetch('/api/live-alerts');
+        const res = await fetch('/api/live-alerts?t=' + Date.now());
         const data = await res.json();
         feed.innerHTML = '';
         if (!data.alerts || data.alerts.length === 0) {
@@ -1818,6 +1820,7 @@
       const firstName = (state.name || '').split(' ')[0];
       const capitalizedFirst = firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() : '';
       document.getElementById('greetingText').textContent = capitalizedFirst ? `Hello, ${capitalizedFirst}!` : 'Hello!';
+      if (window._liveAlertInterval) clearInterval(window._liveAlertInterval);
       show('s1b');
     };
     document.getElementById('btnGenerateBriefing').onclick = () => {
@@ -2906,3 +2909,4 @@
   </script>
 </body>
 </html>
+

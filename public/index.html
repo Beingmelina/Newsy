@@ -1844,8 +1844,7 @@
       const params = new URLSearchParams(window.location.search);
       if (params.get('notifications') !== null) {
         window.history.replaceState({}, '', '/');
-        showLiveAlert();
-        return;
+        setTimeout(() => showLiveAlert(), 800);
       }
       
       if(isReturningUser){

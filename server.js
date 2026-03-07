@@ -1003,7 +1003,7 @@ app.post('/api/user-lookup-or-create', async (req, res) => {
 
     // Try to find an existing preferences row for this email (most recent if duplicates exist)
     const existing = await pool.query(
-      `SELECT user_id FROM user_preferences WHERE email = $1 ORDER BY updated_at DESC LIMIT 1`,
+      `SELECT user_id FROM user_preferences WHERE LOWER(email) = LOWER($1) ORDER BY updated_at DESC LIMIT 1`,
       [email]
     );
 

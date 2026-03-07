@@ -1,58 +1,40 @@
-const VOICE_MAP = {
-  'female-british': 'khYwAWwYSjlxlcrwGQ16',
-  'female-american': 'GyAmfuVW0xquOSDB3g94',
-  'female-indian': 'v94rb3DMOvQwADJySFrY',
-  'female-south-african': 'gsm4lUH9bnZ3pjR1Pw7w',
-  'male-british': 'VsQmyFHffusQDewmHB5v',
-  'male-american': 'nPczCjzI2devNBz1zQrb',
-  'male-middle-eastern': 'puDRtQWF8NtQiPMJygTb',
-  'male-indian': 'Hq6EwBRAX1WbS8MuCZtT',
-  'male-pirate': 'PPzYpIqttlTYA83688JI',
-  'ash': 'nPczCjzI2devNBz1zQrb',
-  'coral': 'GyAmfuVW0xquOSDB3g94',
-};
+const fetch = require('node-fetch');
 
-async function textToSpeech(text, voice = 'ash', accent = 'american') {
-  console.log('TTS request - text length:', text.length, 'voice:', voice, 'accent:', accent);
-
-  const apiKey = process.env.ELEVENLABS_API_KEY;
+async function textToSpeech(text, voice = 'onyx', accent = 'american') {
+  console.log('TTS request - voice:', voice, 'accent:', accent);
+  const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw new Error('ELEVENLABS_API_KEY environment variable not set');
+    throw new Error('OPENAI_API_KEY environment variable not set');
   }
 
-  const voiceId = VOICE_MAP[voice] || VOICE_MAP['male-british'];
+  // Map any legacy voice values to OpenAI voices
+  let openAIVoice = 'onyx';
+  if (voice === 'nova' || voice === 'female' || (typeof voice === 'string' && voice.startsWith('female'))) {
+    openAIVoice = 'nova';
+  }
 
-  const response = await fetch(
-    `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-    {
-      method: 'POST',
-      headers: {
-        'xi-api-key': apiKey,
-        'Content-Type': 'application/json',
-        'Accept': 'audio/mpeg'
-      },
-      body: JSON.stringify({
-        text: text,
-        model_id: 'eleven_turbo_v2_5',
-        voice_settings: {
-          stability: 0.65,
-          similarity_boost: 0.8,
-          style: 0.2,
-          use_speaker_boost: true
-        }
-      })
-    }
-  );
+  const response = await fetch('https://api.openai.com/v1/audio/speech', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'tts-1',
+      input: text,
+      voice: openAIVoice
+    })
+  });
 
   if (!response.ok) {
     const errText = await response.text();
-    console.error('ElevenLabs TTS error:', response.status, errText);
-    throw new Error('ElevenLabs TTS failed: ' + errText);
+    console.error('OpenAI TTS error:', response.status, errText);
+    throw new Error('OpenAI TTS failed: ' + errText);
   }
 
   const arrayBuffer = await response.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
-  console.log('TTS success - audio bytes:', buffer.length);
+  console.log('TTS success - audio bytes:', buffer.length, 'voice:', openAIVoice);
   return buffer;
 }
 

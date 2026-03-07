@@ -838,12 +838,15 @@
   <!-- Add to Home Screen Popup -->
   <div id="a2hsOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; align-items:flex-end; justify-content:center;">
     <div style="background:#fff; border:3px solid #000; border-bottom:none; width:100%; max-width:480px; padding:28px 28px 32px; display:flex; flex-direction:column; gap:20px;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <p style="margin:0; font-size:18px; font-weight:700;">Add Newsy to your Home Screen</p>
-        <button type="button" id="a2hsClose" style="background:none; border:none; font-size:24px; cursor:pointer; padding:0 8px;" aria-label="Close">×</button>
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <span style="font-size:20px; font-weight:700; color:#000; line-height:1.2;">Add Newsy to your<br>Home Screen</span>
+        <button onclick="closeA2HS()" style="background:none; border:none; cursor:pointer; font-size:22px; color:#000; line-height:1; padding:0;">&#x2715;</button>
       </div>
-      <p style="margin:0; font-size:14px; color:#333;">For the best experience and push notifications, add this app to your home screen.</p>
-      <button type="button" class="btn btnPrimary" id="a2hsInstall" style="display:none;">Add to Home Screen</button>
+      <div style="height:2px; background:#000; width:100%;"></div>
+      <div id="a2hsSteps" style="display:flex; flex-direction:column; gap:14px;"></div>
+      <div style="height:2px; background:#000; width:100%;"></div>
+      <button onclick="closeA2HS()" style="width:100%; padding:16px; font-family:inherit; font-size:15px; font-weight:600; border:3px solid #000; cursor:pointer; background:#000; color:#fff; letter-spacing:0.02em;">Got it</button>
+      <button id="a2hsDontShow" onclick="dismissA2HSForever()" style="display:none; width:100%; padding:12px; font-family:inherit; font-size:14px; background:transparent; border:none; cursor:pointer; color:#666; text-decoration:underline;">Don't show again</button>
     </div>
   </div>
 

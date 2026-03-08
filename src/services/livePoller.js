@@ -3,6 +3,8 @@ const Anthropic = require('@anthropic-ai/sdk');
 
 const parser = new Parser();
 const seenArticles = new Set();
+const sentAlertEvents = new Map();
+const SENT_ALERT_TTL = 24 * 60 * 60 * 1000;
 let isRunning = false;
 let pollInterval = null;
 
@@ -172,6 +174,22 @@ function generateArticleId(article) {
   return `${article.source}:${article.url || article.title}`;
 }
 
+function isDuplicateEvent(newTitle) {
+  const now = Date.now();
+  for (const [sentTitle, sentTime] of sentAlertEvents.entries()) {
+    if (now - sentTime > SENT_ALERT_TTL) {
+      sentAlertEvents.delete(sentTitle);
+      continue;
+    }
+    const newWords = newTitle.toLowerCase().split(/\s+/).filter(w => w.length > 4);
+    const sentWords = sentTitle.toLowerCase().split(/\s+/).filter(w => w.length > 4);
+    const overlap = newWords.filter(w => sentWords.includes(w)).length;
+    const similarity = overlap / Math.max(newWords.length, sentWords.length);
+    if (similarity >= 0.5) return true;
+  }
+  return false;
+}
+
 function pruneSeenArticles() {
   if (seenArticles.size > MAX_SEEN_SIZE) {
     const entries = Array.from(seenArticles);
@@ -219,6 +237,11 @@ async function pollForBreakingNews(sendNotificationCallback) {
 if (status === 'UNCONFIRMED') body = `Via ${article.source}`;
       
       console.log(`  - [${status}] ${article.source}: ${article.title}`);
+      if (isDuplicateEvent(article.title)) {
+        console.log(`  - [SKIPPED - duplicate event] ${article.source}: ${article.title}`);
+        continue;
+      }
+      sentAlertEvents.set(article.title, Date.now());
       try {
         await sendNotificationCallback({
           title: `${prefix}: ${article.title}`,

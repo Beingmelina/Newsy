@@ -30,10 +30,7 @@ const RSS_FEEDS = {
     { name: 'Iran International', url: 'https://www.iranintl.com/en/feed', region: 'Middle East' },
     { name: 'NYT Middle East', url: 'https://rss.nytimes.com/services/xml/rss/nyt/MiddleEast.xml', region: 'Middle East' },
     { name: 'Guardian Middle East', url: 'https://www.theguardian.com/world/middleeast/rss', region: 'Middle East' },
-    { name: 'Syria Direct', url: 'https://syriadirect.org/feed', region: 'Middle East' },
 
-    { name: 'IRNA (Iran state)', url: 'https://en.irna.ir/rss', region: 'Middle East', stateMedia: true },
-    { name: 'Tehran Times', url: 'https://www.tehrantimes.com/rss', region: 'Middle East', stateMedia: true },
     { name: 'France 24 Arabic', url: 'https://www.france24.com/ar/rss', region: 'Middle East', lang: 'ar' },
     { name: 'France 24 ME', url: 'https://www.france24.com/en/middle-east/rss', region: 'Middle East' },
     { name: 'Iran International (Farsi)', url: 'https://www.iranintl.com/fa/feed', region: 'Middle East', lang: 'fa' },
@@ -41,6 +38,7 @@ const RSS_FEEDS = {
     { name: 'Walla News (Hebrew)', url: 'https://rss.walla.co.il/feed/1', region: 'Middle East', lang: 'he' },
     { name: 'International Crisis Group', url: 'https://www.crisisgroup.org/rss.xml', region: 'Middle East' },
     { name: 'Iraqi News', url: 'https://www.iraqinews.com/feed/', region: 'Middle East' },
+    { name: 'Al Monitor', url: 'https://www.al-monitor.com/rss', region: 'Middle East' },
   ],
   'Business/Markets': [
     { name: 'BBC Business', url: 'https://feeds.bbci.co.uk/news/business/rss.xml', region: 'Global' },
@@ -101,8 +99,6 @@ const REGION_FEEDS = {
     { name: 'Iran International', url: 'https://www.iranintl.com/en/feed' },
     { name: 'Guardian Middle East', url: 'https://www.theguardian.com/world/middleeast/rss' },
     { name: 'NYT Middle East', url: 'https://rss.nytimes.com/services/xml/rss/nyt/MiddleEast.xml' },
-    { name: 'Syria Direct', url: 'https://syriadirect.org/feed' },
-    { name: 'IRNA (Iran state)', url: 'https://en.irna.ir/rss', stateMedia: true },
     { name: 'France 24 Arabic', url: 'https://www.france24.com/ar/rss', lang: 'ar' },
     { name: 'France 24 ME', url: 'https://www.france24.com/en/middle-east/rss' },
     { name: 'Iran International (Farsi)', url: 'https://www.iranintl.com/fa/feed', lang: 'fa' },
@@ -135,7 +131,7 @@ async function translateArticles(articles) {
   if (articles.length === 0) return [];
 
   const textsToTranslate = articles.map((a, i) =>
-    `[${i}] TITLE: ${a.title}\nDESC: ${a.description}`
+    `[${i}] TITLE: ${a.title}\nDESC: ${a.description?.substring(0, 400) || ''}`
   ).join('\n\n');
 
   try {

@@ -481,7 +481,7 @@ Only include sections that have content. Skip empty sections.`;
 
   try {
     const client = getAnthropicClient();
-    const maxTokensNonStream = { short: 2048, long: 4096 };
+    const maxTokensNonStream = { short: 4096, long: 8192 };
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: maxTokensNonStream[lengthPref] || 2048,

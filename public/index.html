@@ -596,17 +596,10 @@
       <h1 class="logo">Newsy</h1>
       <p class="instruction">Choose your news reader voice.</p>
       <p class="fieldLabel">Choose your voice</p>
-      <div class="stack" id="voiceGrid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <div class="seg" data-voice="female-british" role="button" tabindex="0">Female British</div>
-        <div class="seg" data-voice="female-american" role="button" tabindex="0">Female American</div>
-        <div class="seg" data-voice="female-indian" role="button" tabindex="0">Female Indian</div>
-        <div class="seg" data-voice="female-south-african" role="button" tabindex="0">Female South African</div>
-        <div class="seg" data-voice="male-british" role="button" tabindex="0">Male British</div>
-        <div class="seg" data-voice="male-american" role="button" tabindex="0">Male American</div>
-        <div class="seg" data-voice="male-middle-eastern" role="button" tabindex="0">Male Middle Eastern</div>
-        <div class="seg" data-voice="male-indian" role="button" tabindex="0">Male Indian</div>
-        <div class="seg" data-voice="male-pirate" role="button" tabindex="0">Male Pirate</div>
-      </div>
+        <div class="stack" id="voiceGrid" style="display: flex; flex-direction: column; gap: 10px;">
+          <div class="seg" data-voice="onyx" role="button" tabindex="0">Male</div>
+          <div class="seg" data-voice="nova" role="button" tabindex="0">Female</div>
+        </div>
 
       <div class="row">
         <button class="btn btnPrimary" id="btnS6">Next</button>
@@ -768,17 +761,10 @@
       <p class="instruction">Edit Voice Preferences</p>
 
       <p class="fieldLabel">Choose your voice</p>
-      <div class="stack" id="voiceGridEdit" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <div class="seg" data-voice="female-british" role="button" tabindex="0">Female British</div>
-        <div class="seg" data-voice="female-american" role="button" tabindex="0">Female American</div>
-        <div class="seg" data-voice="female-indian" role="button" tabindex="0">Female Indian</div>
-        <div class="seg" data-voice="female-south-african" role="button" tabindex="0">Female South African</div>
-        <div class="seg" data-voice="male-british" role="button" tabindex="0">Male British</div>
-        <div class="seg" data-voice="male-american" role="button" tabindex="0">Male American</div>
-        <div class="seg" data-voice="male-middle-eastern" role="button" tabindex="0">Male Middle Eastern</div>
-        <div class="seg" data-voice="male-indian" role="button" tabindex="0">Male Indian</div>
-        <div class="seg" data-voice="male-pirate" role="button" tabindex="0">Male Pirate</div>
-      </div>
+        <div class="stack" id="voiceGridEdit" style="display: flex; flex-direction: column; gap: 10px;">
+          <div class="seg" data-voice="onyx" role="button" tabindex="0">Male</div>
+          <div class="seg" data-voice="nova" role="button" tabindex="0">Female</div>
+        </div>
 
       <button class="btn btnPrimary btnFull" id="btnSaveVoice">Save</button>
     </section>
@@ -889,8 +875,8 @@
       outlets: new Set(),
       topics: new Set(),
       regions: new Set(),
-      voiceGender: "male",
-      voiceAccent: "male-british",
+      voiceGender: "onyx",
+      voiceAccent: "onyx",
       briefingLength: "short",
       briefingsPerDay: 1,
       briefingTimes: ["08:00", "12:00", "17:00", "20:00"],
@@ -980,8 +966,8 @@
       state.outlets = new Set(Array.isArray(p.outlets) ? p.outlets : Array.from(DEFAULT_OUTLETS));
       state.topics = new Set(Array.isArray(p.topics) ? p.topics : Array.from(DEFAULT_TOPICS));
       state.regions = new Set(Array.isArray(p.regions) ? p.regions : Array.from(DEFAULT_REGIONS));
-      state.voiceGender = p.voiceGender || "male";
-      state.voiceAccent = (p.voiceAccent && p.voiceAccent.includes('-')) ? p.voiceAccent : "male-british";
+      state.voiceGender = p.voiceGender || "onyx";
+      state.voiceAccent = (p.voiceAccent === 'nova') ? 'nova' : 'onyx';
       state.briefingLength = p.briefingLength || "short";
       state.briefingsPerDay = Math.min(4, Math.max(1, p.briefingsPerDay || 1));
       state.briefingTimes = Array.isArray(p.briefingTimes) ? p.briefingTimes : ["08:00", "12:00", "17:00", "20:00"];
@@ -1151,7 +1137,7 @@
     }
 
     function getVoiceSettings(){
-      const voice = (state.voiceAccent && state.voiceAccent.includes('-')) ? state.voiceAccent : 'male-british';
+      const voice = (state.voiceAccent === 'nova') ? 'nova' : 'onyx';
       return { voice, accent: voice };
     }
 

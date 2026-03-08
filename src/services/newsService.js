@@ -47,29 +47,47 @@ const RSS_FEEDS = {
     { name: 'CNBC', url: 'https://www.cnbc.com/id/100003114/device/rss/rss.html', region: 'US/Canada' },
     { name: 'Financial Times', url: 'https://www.ft.com/rss/home', region: 'Global' },
     { name: 'Bloomberg', url: 'https://feeds.bloomberg.com/markets/news.rss', region: 'Global' },
+    { name: 'WSJ Markets', url: 'https://feeds.content.dowjones.io/public/rss/RSSMarketsMain', region: 'Global' },
+    { name: 'WSJ Business', url: 'https://feeds.content.dowjones.io/public/rss/WSJcomUSBusiness', region: 'Global' },
+    { name: 'Nikkei Asia', url: 'https://asia.nikkei.com/rss/feed/nar', region: 'Global' },
+    { name: 'SCMP', url: 'https://www.scmp.com/rss/91/feed', region: 'Global' },
+    { name: 'The Economist Finance', url: 'https://www.economist.com/finance-and-economics/rss.xml', region: 'Global' },
+    { name: 'The Economist Business', url: 'https://www.economist.com/business/rss.xml', region: 'Global' },
   ],
   'Tech/AI': [
     { name: 'BBC Technology', url: 'https://feeds.bbci.co.uk/news/technology/rss.xml', region: 'Global' },
     { name: 'TechCrunch', url: 'https://techcrunch.com/feed/', region: 'Global' },
     { name: 'Wired', url: 'https://www.wired.com/feed/rss', region: 'Global' },
     { name: 'Ars Technica', url: 'https://feeds.arstechnica.com/arstechnica/index', region: 'Global' },
+    { name: 'The Verge', url: 'https://www.theverge.com/rss/index.xml', region: 'Global' },
+    { name: 'MIT Technology Review', url: 'https://www.technologyreview.com/feed', region: 'Global' },
+    { name: 'VentureBeat AI', url: 'https://venturebeat.com/category/ai/feed/', region: 'Global' },
+    { name: 'Rest of World', url: 'https://restofworld.org/feed/latest/', region: 'Global' },
   ],
   'Health/Longevity': [
     { name: 'BBC Health', url: 'https://feeds.bbci.co.uk/news/health/rss.xml', region: 'Global' },
     { name: 'NPR Health', url: 'https://feeds.npr.org/103537970/rss.xml', region: 'US/Canada' },
+    { name: 'STAT News', url: 'https://www.statnews.com/feed/', region: 'Global' },
+    { name: 'Guardian Health', url: 'https://www.theguardian.com/society/health/rss', region: 'Global' },
   ],
   'Arts/Culture': [
     { name: 'BBC Entertainment', url: 'https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml', region: 'Global' },
     { name: 'NPR Arts', url: 'https://feeds.npr.org/1008/rss.xml', region: 'US/Canada' },
     { name: 'The Guardian Culture', url: 'https://www.theguardian.com/culture/rss', region: 'Europe' },
+    { name: 'The Atlantic', url: 'https://www.theatlantic.com/feed/all/', region: 'Global' },
+    { name: 'The Economist Culture', url: 'https://www.economist.com/culture/rss.xml', region: 'Global' },
+    { name: 'Pitchfork', url: 'https://pitchfork.com/feed/rss', region: 'Global' },
   ],
   'Sports': [
     { name: 'BBC Sport', url: 'https://feeds.bbci.co.uk/sport/rss.xml', region: 'Global' },
     { name: 'ESPN', url: 'https://www.espn.com/espn/rss/news', region: 'US/Canada' },
+    { name: 'Sky Sports', url: 'https://www.skysports.com/rss/12040', region: 'Global' },
   ],
   'Entertainment': [
     { name: 'BBC Entertainment', url: 'https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml', region: 'Global' },
     { name: 'Variety', url: 'https://variety.com/feed/', region: 'Global' },
+    { name: 'Hollywood Reporter', url: 'https://www.hollywoodreporter.com/feed/', region: 'Global' },
+    { name: 'Deadline', url: 'https://deadline.com/feed/', region: 'Global' },
   ]
 };
 

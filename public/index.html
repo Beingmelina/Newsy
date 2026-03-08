@@ -967,7 +967,13 @@
       state.topics = new Set(Array.isArray(p.topics) ? p.topics : Array.from(DEFAULT_TOPICS));
       state.regions = new Set(Array.isArray(p.regions) ? p.regions : Array.from(DEFAULT_REGIONS));
       state.voiceGender = p.voiceGender || "onyx";
-      state.voiceAccent = (p.voiceAccent === 'nova') ? 'nova' : 'onyx';
+      const legacyVoices = ['male-british','male-american','male-middle-eastern','male-indian','male-pirate','ash','coral'];
+      const femaleVoices = ['female-british','female-american','female-indian','female-south-african','nova'];
+      if (femaleVoices.includes(p.voiceAccent)) {
+        state.voiceAccent = 'nova';
+      } else {
+        state.voiceAccent = 'onyx';
+      }
       state.briefingLength = p.briefingLength || "short";
       state.briefingsPerDay = Math.min(4, Math.max(1, p.briefingsPerDay || 1));
       state.briefingTimes = Array.isArray(p.briefingTimes) ? p.briefingTimes : ["08:00", "12:00", "17:00", "20:00"];

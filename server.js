@@ -1014,7 +1014,8 @@ app.get('/api/user-state/:uuid', async (req, res) => {
 // If it doesn't, return a new or existing userId to use for this email going forward.
 app.post('/api/user-lookup-or-create', async (req, res) => {
   try {
-    const { email, name, currentId } = req.body || {};
+    const { name, currentId } = req.body || {};
+    const email = req.body.email ? req.body.email.toLowerCase().trim() : null;
     console.log('User lookup/create called:', email, currentId);
     console.log('User lookup/create called:', email, currentId);
     if (!email) {

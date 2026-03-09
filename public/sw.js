@@ -1,16 +1,12 @@
 const CACHE_NAME = 'newsy-v4';
-
 self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
-
 self.addEventListener('activate', (event) => {
   event.waitUntil(clients.claim());
 });
-
 self.addEventListener('push', (event) => {
   let data = { title: 'Newsy', body: 'Your briefing is ready' };
-  
   if (event.data) {
     try {
       data = event.data.json();
@@ -18,7 +14,6 @@ self.addEventListener('push', (event) => {
       data.body = event.data.text();
     }
   }
-  
   const options = {
     body: data.body,
     icon: '/icon.svg',
@@ -30,24 +25,20 @@ self.addEventListener('push', (event) => {
       { action: 'open', title: 'Listen Now' }
     ]
   };
-  
   event.waitUntil(
     self.registration.showNotification(data.title, options)
   );
 });
-
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-
   const tag = event.notification.tag || '';
   const isLiveUpdate = tag.startsWith('live-update-');
-  const url = isLiveUpdate ? '/?notifications' : '/';
+  const url = isLiveUpdate ? '/?action=updates' : '/?action=briefing';
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
         if (client.url.includes(self.location.origin) && 'focus' in client) {
-          client.postMessage({ type: isLiveUpdate ? 'show-notifications' : 'show-briefing' });
-          return client.focus();
+          return client.navigate(url).then(c => c.focus());
         }
       }
       if (clients.openWindow) {

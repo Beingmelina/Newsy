@@ -1825,8 +1825,7 @@
         } else if (event.data && event.data.type === 'show-briefing') {
           await loadState();
           if (state.isRegistered) {
-            show('s1b');
-            setTimeout(() => document.getElementById('btnGetBriefing').click(), 100);
+            document.getElementById('btnGetBriefing').click();
           } else {
             show('s1');
           }
@@ -1839,16 +1838,20 @@
       const isReturningUser = await loadState();
       
       const params = new URLSearchParams(window.location.search);
-      if (params.get('notifications') !== null) {
-        window.history.replaceState({}, '', '/');
-        setTimeout(() => showLiveAlert(), 800);
-      }
-      
+      const action = params.get('action');
+      window.history.replaceState({}, '', '/');
       if(isReturningUser){
         const firstName = (state.name || '').split(' ')[0];
         const capitalizedFirst = firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() : '';
         document.getElementById('greetingText').textContent = capitalizedFirst ? `Hello, ${capitalizedFirst}!` : 'Hello!';
-        show('s1b');
+        if (action === 'briefing') {
+          show('s9');
+          document.getElementById('btnGetBriefing').click();
+        } else if (action === 'updates') {
+          setTimeout(() => showLiveAlert(), 800);
+        } else {
+          show('s1b');
+        }
       } else {
         show('s1');
       }

@@ -669,10 +669,11 @@
       <h1 class="logo">Newsy</h1>
       <p class="briefingMeta" id="briefingMeta"></p>
       <p class="instruction" id="briefingInstruction">Your briefing</p>
+      <button class="btn btnPrimary btnFull" id="btnPlayTop" style="margin-top: 18px; display:none;" disabled>Please wait, your briefing is loading.</button>
 
       <div class="briefingBox" id="briefingText"></div>
 
-      <button class="btn btnPrimary btnFull" id="btnPlay" style="margin-top: 18px;">Play briefing</button>
+      <button class="btn btnPrimary btnFull" id="btnPlay" style="margin-top: 18px; display:none;">Play briefing</button>
 
       <div id="deepDiveSection" class="hidden">
         <p class="instruction" style="margin-top: 26px; font-weight: bold;">Would you like to deep dive into any of these topics?</p>
@@ -2402,6 +2403,9 @@
       preloadedAudioBlobs = [];
 
       document.getElementById('briefingText').textContent = briefing;
+      document.getElementById('btnPlayTop').textContent = 'Play audio';
+      document.getElementById('btnPlayTop').disabled = false;
+      document.getElementById('btnPlayTop').onclick = () => document.getElementById('btnPlay').click();
       document.getElementById('btnPlay').textContent = 'Play briefing';
       document.getElementById('btnPlay').disabled = false;
 
@@ -2433,6 +2437,9 @@
       document.getElementById('briefingInstruction').style.display = 'none';
       document.getElementById('briefingMeta').textContent = getBriefingTimestamp();
       document.getElementById('btnPlay').style.display = 'none';
+      document.getElementById('btnPlayTop').style.display = '';
+      document.getElementById('btnPlayTop').disabled = true;
+      document.getElementById('btnPlayTop').textContent = 'Please wait, your briefing is loading.';
       document.getElementById('deepDiveSection').classList.add('hidden');
       document.getElementById('briefingText').textContent = '';
       show('s9');
@@ -2464,6 +2471,9 @@
       document.getElementById('deepDiveSection').classList.add('hidden');
       document.getElementById('briefingInstruction').style.display = 'none';
       document.getElementById('btnPlay').style.display = 'none';
+      document.getElementById('btnPlayTop').style.display = '';
+      document.getElementById('btnPlayTop').disabled = true;
+      document.getElementById('btnPlayTop').textContent = 'Please wait, your briefing is loading.';
       document.getElementById('briefingText').textContent = '';
       show('s9');
       startCountdown(120);

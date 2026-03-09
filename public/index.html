@@ -1820,11 +1820,16 @@
     };
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('message', (event) => {
+      navigator.serviceWorker.addEventListener('message', async (event) => {
         if (event.data && event.data.type === 'show-notifications') {
           showLiveAlert();
         } else if (event.data && event.data.type === 'show-briefing') {
-          show('s2');
+          await loadState();
+          if (state.isRegistered) {
+            document.getElementById('btnGetBriefing').click();
+          } else {
+            show('s1');
+          }
         }
       });
     }

@@ -113,9 +113,10 @@
     }
     
     .frame.noScroll{
-      height: 100dvh;
-      max-height: 100vh;
-      min-height: 100vh;
+      height: calc(100dvh - 16px);
+      max-height: calc(100dvh - 16px);
+      min-height: calc(100dvh - 16px);
+      margin: 8px;
       overflow: hidden;
     }
 
@@ -125,7 +126,7 @@
       flex-direction: column;
       max-width: 100%;
       overflow-x: hidden;
-      position: relative;
+      position: static;
     }
 
     .frame section .logo{

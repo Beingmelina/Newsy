@@ -1815,7 +1815,12 @@
       show('s1b');
     };
     document.getElementById('btnGenerateBriefing').onclick = () => {
-      show('s2');
+      if (state.isRegistered) {
+        show('s9');
+        document.getElementById('btnGetBriefing').click();
+      } else {
+        show('s1');
+      }
     };
 
     if ('serviceWorker' in navigator) {

@@ -182,7 +182,7 @@ async function fetchFeed(feedInfo, topic) {
     ]);
     return feed.items.slice(0, 5).map(item => ({
       title: item.title || '',
-      description: item.contentSnippet || item.content || item.description || '',
+      description: (item.contentSnippet || item.content || item.description || '').substring(0, 800),
       content: item.content || item.contentSnippet || item.description || '',
       source: feedInfo.name,
       url: item.link || '',

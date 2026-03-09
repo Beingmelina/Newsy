@@ -346,11 +346,13 @@
       padding: 18px;
       display: grid;
       gap: 10px;
-      max-width: 100%;
+      width: fit-content;
+      min-width: 200px;
+      max-width: 280px;
       overflow: hidden;
       box-sizing: border-box;
-      margin-left: 2px;
-      margin-right: 2px;
+      margin-left: auto;
+      margin-right: auto;
     }
     .timeLabel{
       font-weight: 700;
@@ -628,9 +630,11 @@
       <h1 class="logo">Newsy</h1>
       <p class="instruction">How many briefings would you like per day?</p>
 
-      <div class="segRow" style="grid-template-columns: repeat(2, 1fr);">
-        <div class="seg active" data-count="1" role="button" tabindex="0">1</div>
-        <div class="seg" data-count="2" role="button" tabindex="0">2</div>
+      <div class="segRow" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="seg" data-count="1" role="button" tabindex="0">1</div>
+        <div class="seg active" data-count="2" role="button" tabindex="0">2</div>
+        <div class="seg" data-count="3" role="button" tabindex="0">3</div>
+        <div class="seg" data-count="4" role="button" tabindex="0">4</div>
       </div>
 
       <div class="stack" style="margin-top: 18px;" id="scheduleTimesContainer">
@@ -785,9 +789,11 @@
       <h1 class="logo">Newsy</h1>
       <p class="instruction">Edit Schedule</p>
 
-      <div class="segRow" style="grid-template-columns: repeat(2, 1fr);" id="scheduleSegRowEdit">
+      <div class="segRow" style="grid-template-columns: repeat(4, 1fr);" id="scheduleSegRowEdit">
         <div class="seg" data-count="1" role="button" tabindex="0">1</div>
-        <div class="seg" data-count="2" role="button" tabindex="0">2</div>
+        <div class="seg active" data-count="2" role="button" tabindex="0">2</div>
+        <div class="seg" data-count="3" role="button" tabindex="0">3</div>
+        <div class="seg" data-count="4" role="button" tabindex="0">4</div>
       </div>
 
       <div class="stack" style="margin-top: 18px;" id="scheduleTimesContainerEdit">

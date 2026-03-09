@@ -340,7 +340,7 @@ async function getAllScheduledUsers() {
 
 async function preGenerateAndNotify(userId) {
   // Only pre-generate audio if this user still has an active push subscription.
-  // This prevents burning ElevenLabs credits when there are no subscribers.
+  // This prevents burning OpenAI TTS credits when there are no subscribers.
   const subscription = await getPushSubscription(userId);
   if (!subscription) {
     console.log('[PreGen] Skipping pre-generation, no push subscription for user:', userId);
@@ -771,7 +771,6 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
-    hasElevenLabs: !!process.env.ELEVENLABS_API_KEY
   });
 });
 
@@ -1177,7 +1176,6 @@ app.get('/api/live-poller-status', (req, res) => {
 const server = app.listen(PORT, '0.0.0.0', async () => {
   console.log(`Newsy server running on port ${PORT}`);
   console.log(`Anthropic AI configured: ${!!process.env.ANTHROPIC_API_KEY}`);
-  console.log(`ElevenLabs TTS configured: ${!!process.env.ELEVENLABS_API_KEY}`);
   console.log(`Database connected: ${!!process.env.DATABASE_URL}`);
 
   try {

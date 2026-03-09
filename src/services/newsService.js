@@ -138,7 +138,7 @@ async function translateArticles(articles) {
     const client = getTranslationClient();
     const message = await client.messages.create({
       model: 'claude-haiku-4-5',
-      max_tokens: 2048,
+      max_tokens: 4096,
       messages: [{
         role: 'user',
         content: `Translate the following news headlines and descriptions to English. Keep the [index] numbering. Output ONLY the translations, one per line in format: [index] TITLE: translated title | DESC: translated description\n\n${textsToTranslate}`

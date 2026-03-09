@@ -2376,6 +2376,13 @@
     // Listen now (from setup complete)
     function showBriefingResult(briefing, topics, sections, hasAudio) {
       stopCountdown();
+      persistentAudio.pause();
+      persistentAudio.src = '';
+      isPlaying = false;
+      if (currentAudioUrl) {
+        URL.revokeObjectURL(currentAudioUrl);
+        currentAudioUrl = null;
+      }
       document.getElementById('briefingInstruction').style.display = 'none';
       document.getElementById('btnPlay').style.display = '';
       state.lastBriefingText = briefing;

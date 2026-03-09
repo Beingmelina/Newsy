@@ -1,4 +1,6 @@
 const Parser = require('rss-parser');
+const { Pool } = require('pg');
+const translationPool = new Pool({ connectionString: process.env.DATABASE_URL });
 const Anthropic = require('@anthropic-ai/sdk');
 const parser = new Parser();
 
@@ -130,8 +132,47 @@ const REGION_FEEDS = {
 async function translateArticles(articles) {
   if (articles.length === 0) return [];
 
-  const textsToTranslate = articles.map((a, i) =>
-    `[${i}] TITLE: ${a.title}\nDESC: ${a.description?.substring(0, 400) || ''}`
+  const articleIds = articles.map(a => `${a.source}:${a.url || a.title}`);
+
+  let cachedRows = [];
+  try {
+    const cacheResult = await translationPool.query(
+      `SELECT article_id, translated_title, translated_description FROM translation_cache WHERE article_id = ANY($1) AND created_at > NOW() - INTERVAL '48 hours'`,
+      [articleIds]
+    );
+    cachedRows = cacheResult.rows;
+  } catch (err) {
+    console.error('Translation cache lookup failed:', err.message);
+  }
+
+  const cacheMap = {};
+  for (const row of cachedRows) {
+    cacheMap[row.article_id] = row;
+  }
+
+  const toTranslate = [];
+  for (let i = 0; i < articles.length; i++) {
+    const article = articles[i];
+    const articleId = articleIds[i];
+    const cached = cacheMap[articleId];
+    if (cached) {
+      article.originalTitle = article.title;
+      article.title = cached.translated_title;
+      article.description = cached.translated_description;
+      article.translated = true;
+      article.fromCache = true;
+    } else {
+      toTranslate.push({ article, articleId, index: i });
+    }
+  }
+
+  if (toTranslate.length === 0) {
+    console.log('All translations served from cache');
+    return articles;
+  }
+
+  const textsToTranslate = toTranslate.map(({ article }, i) =>
+    `[${i}] TITLE: ${article.title}\nDESC: ${article.description?.substring(0, 400) || ''}`
   ).join('\n\n');
 
   try {
@@ -153,16 +194,27 @@ async function translateArticles(articles) {
       const match = line.match(/\[(\d+)\]\s*TITLE:\s*(.*?)\s*\|\s*DESC:\s*(.*)/);
       if (match) {
         const idx = parseInt(match[1]);
-        if (idx < articles.length) {
-          articles[idx].originalTitle = articles[idx].title;
-          articles[idx].title = match[2].trim();
-          articles[idx].description = match[3].trim();
-          articles[idx].translated = true;
+        if (idx < toTranslate.length) {
+          const { article, articleId } = toTranslate[idx];
+          article.originalTitle = article.title;
+          article.title = match[2].trim();
+          article.description = match[3].trim();
+          article.translated = true;
+          try {
+            await translationPool.query(
+              `INSERT INTO translation_cache (article_id, original_title, translated_title, translated_description, lang) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (article_id) DO NOTHING`,
+              [articleId, article.originalTitle, article.title, article.description, article.lang]
+            );
+          } catch (err) {
+            console.error('Failed to save translation to cache:', err.message);
+          }
         }
       }
     }
 
-    console.log(`Translated ${articles.filter(a => a.translated).length}/${articles.length} articles`);
+    const fromCache = articles.filter(a => a.fromCache).length;
+    const fresh = toTranslate.length;
+    console.log(`Translations: ${fromCache} from cache, ${fresh} fresh API calls`);
   } catch (err) {
     console.error('Translation failed:', err.message);
   }

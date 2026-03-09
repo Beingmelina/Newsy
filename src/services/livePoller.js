@@ -246,7 +246,8 @@ if (status === 'UNCONFIRMED') body = `Via ${article.source}`;
         await sendNotificationCallback({
           title: `${prefix}: ${article.title}`,
           body: body,
-          topic: 'middle-east-tensions'
+          topic: 'middle-east-tensions',
+          url: article.url || ''
         });
       } catch (err) {
         console.error('[LivePoller] Failed to send notification:', err.message);

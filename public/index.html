@@ -1799,7 +1799,14 @@
           const rawTitle = item.title || '';
           const headline = rawTitle.replace(/^(Breaking|Developing|Unconfirmed):\s*/i, '').trim();
           const source = item.source || '';
-          card.innerHTML = `<p style="font-size:12px; color:#888; margin:0 0 6px 0;">${timestamp}</p><p style="font-size:15px; color:#111; margin:0; line-height:1.5;">${headline}${source ? ' - ' + source : ''}</p>`;
+          const cardUrl = item.url || '';
+          const innerContent = `<p style="font-size:12px; color:#888; margin:0 0 6px 0;">${timestamp}</p><p style="font-size:15px; color:#111; margin:0; line-height:1.5;">${headline}${source ? ' - ' + source : ''}</p>`;
+          if (cardUrl) {
+            card.style.cursor = 'pointer';
+            card.innerHTML = `<a href="${cardUrl}" target="_blank" rel="noopener noreferrer" style="text-decoration:none; color:inherit; display:block;">${innerContent}</a>`;
+          } else {
+            card.innerHTML = innerContent;
+          }
           feed.appendChild(card);
         }
       } catch (err) {

@@ -1115,7 +1115,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-async function sendLiveUpdateToSubscribers({ title, body, topic }) {
+async function sendLiveUpdateToSubscribers({ title, body, topic, url }) {
   try {
     const topicFilter = topic || 'middle-east-tensions';
     const subscribers = await pool.query(
@@ -1147,8 +1147,8 @@ async function sendLiveUpdateToSubscribers({ title, body, topic }) {
       console.log(`[LiveUpdate] Sent to ${sent}/${subscribers.rows.length} subscribers: ${title}`);
       const source = (body || '').replace(/^(Developing story\. Via |Via )/, '').trim();
       await pool.query(
-        `INSERT INTO live_alerts (title, source) VALUES ($1, $2)`,
-        [title, source]
+        `INSERT INTO live_alerts (title, source, url) VALUES ($1, $2, $3)`,
+        [title, source, url || '']
       );
     }
   } catch (err) {
@@ -1160,7 +1160,7 @@ app.get('/api/live-alerts', async (req, res) => {
   try {
     res.set('Cache-Control', 'no-store');
     const result = await pool.query(
-      `SELECT title, source, created_at FROM live_alerts ORDER BY created_at DESC LIMIT 50`
+      `SELECT title, source, url, created_at FROM live_alerts ORDER BY created_at DESC LIMIT 50`
     );
     res.json({ alerts: result.rows });
   } catch (err) {

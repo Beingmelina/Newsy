@@ -1,18 +1,10 @@
-const fetch = require('node-fetch');
-
-async function textToSpeech(text, voice = 'onyx', accent = 'american') {
-  console.log('TTS request - voice:', voice, 'accent:', accent);
+async function textToSpeech(text, voice = 'onyx') {
+  console.log('TTS request - voice:', voice);
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     throw new Error('OPENAI_API_KEY environment variable not set');
   }
-
-  // Map any legacy voice values to OpenAI voices
-  let openAIVoice = 'onyx';
-  if (voice === 'nova' || voice === 'female' || (typeof voice === 'string' && voice.startsWith('female'))) {
-    openAIVoice = 'nova';
-  }
-
+  const openAIVoice = (voice === 'nova') ? 'nova' : 'onyx';
   const response = await fetch('https://api.openai.com/v1/audio/speech', {
     method: 'POST',
     headers: {
@@ -25,17 +17,14 @@ async function textToSpeech(text, voice = 'onyx', accent = 'american') {
       voice: openAIVoice
     })
   });
-
   if (!response.ok) {
     const errText = await response.text();
     console.error('OpenAI TTS error:', response.status, errText);
     throw new Error('OpenAI TTS failed: ' + errText);
   }
-
   const arrayBuffer = await response.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
   console.log('TTS success - audio bytes:', buffer.length, 'voice:', openAIVoice);
   return buffer;
 }
-
 module.exports = { textToSpeech };

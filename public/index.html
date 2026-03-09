@@ -1144,7 +1144,7 @@
 
     function getVoiceSettings(){
       const voice = (state.voiceAccent === 'nova') ? 'nova' : 'onyx';
-      return { voice, accent: voice };
+      return { voice };
     }
 
     function splitTextIntoSections(text) {
@@ -1191,7 +1191,7 @@
     }
 
     async function generateBriefing(){
-      const { voice, accent } = getVoiceSettings();
+      const { voice } = getVoiceSettings();
       const prefs = {
         topics: Array.from(state.topics),
         regions: Array.from(state.regions),
@@ -1199,7 +1199,6 @@
         otherPublication: state.otherPublication,
         userId: state.uuid,
         voice,
-        accent,
         briefingLength: state.briefingLength
       };
 
@@ -1382,7 +1381,7 @@
     }
 
     async function playAudio(text, onStarted){
-      const { voice, accent } = getVoiceSettings();
+      const { voice } = getVoiceSettings();
       console.log('playAudio called, text length:', text.length);
       
       // Unlock audio immediately on user gesture (before async fetch)
@@ -1393,7 +1392,7 @@
         const res = await fetch('/api/tts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, voice, accent })
+          body: JSON.stringify({ text, voice })
         });
 
         if(!res.ok) {
@@ -1455,7 +1454,7 @@
       }
     }
 
-    async function generateAudioBlob(text, voice, accent) {
+    async function generateAudioBlob(text, voice) {
       if (!text || text.trim().length === 0) {
         throw new Error('No text to generate audio for');
       }
@@ -1469,7 +1468,7 @@
         const res = await fetch('/api/tts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, voice, accent }),
+          body: JSON.stringify({ text, voice }),
           signal: controller.signal
         });
         
@@ -1494,7 +1493,7 @@
     }
 
     async function playChunkedAudio(sections, onStarted) {
-      const { voice, accent } = getVoiceSettings();
+      const { voice } = getVoiceSettings();
       console.log('playChunkedAudio: Starting with', sections.length, 'sections');
       console.log('Sections structure:', JSON.stringify(sections.map(s => ({ id: s?.id, hasText: !!s?.text, textLen: s?.text?.length }))));
       
@@ -1540,7 +1539,7 @@
         const chunk = chunks[index];
         console.log(`Generating chunk ${index + 1}...`);
         try {
-          chunk.blob = await generateAudioBlob(chunk.text, voice, accent);
+          chunk.blob = await generateAudioBlob(chunk.text, voice);
           chunk.url = URL.createObjectURL(chunk.blob);
           chunk.ready = true;
           console.log(`Chunk ${index + 1} ready, size:`, chunk.blob.size);
@@ -1644,7 +1643,7 @@
     }
 
     async function playChunkedDeepDive(text, btn) {
-      const { voice, accent } = getVoiceSettings();
+      const { voice } = getVoiceSettings();
       console.log('playChunkedDeepDive: Starting with', text.length, 'chars');
       
       const paragraphs = text.split(/\n\n+/).filter(p => p.trim().length > 0);
@@ -1677,7 +1676,7 @@
         const chunk = chunks[index];
         console.log(`Deep dive: Generating chunk ${index + 1}...`);
         try {
-          chunk.blob = await generateAudioBlob(chunk.text, voice, accent);
+          chunk.blob = await generateAudioBlob(chunk.text, voice);
           chunk.url = URL.createObjectURL(chunk.blob);
           chunk.ready = true;
           console.log(`Deep dive: Chunk ${index + 1} ready, size:`, chunk.blob.size);
@@ -2222,13 +2221,12 @@
       
       if (scheduleTimes.length === 0) return;
       
-      const { voice, accent } = getVoiceSettings();
+      const { voice } = getVoiceSettings();
       const preferences = {
         topics: Array.from(state.topics),
         regions: Array.from(state.regions),
         outlets: Array.from(state.outlets),
-        voice,
-        accent
+        voice
       };
       
       try {

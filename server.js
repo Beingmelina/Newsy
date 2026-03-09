@@ -19,8 +19,8 @@ function getTextHash(text) {
   return crypto.createHash('md5').update(text).digest('hex');
 }
 
-function getCachedAudioByText(text, voice, accent) {
-  const key = `${getTextHash(text)}_${voice}_${accent}`;
+function getCachedAudioByText(text, voice) {
+  const key = `${getTextHash(text)}_${voice}`;
   const cached = audioCache.get(key);
   if (cached && (Date.now() - cached.timestamp) < AUDIO_CACHE_TTL) {
     return cached.buffer;
@@ -29,8 +29,8 @@ function getCachedAudioByText(text, voice, accent) {
   return null;
 }
 
-function setCachedAudio(text, voice, accent, buffer) {
-  const key = `${getTextHash(text)}_${voice}_${accent}`;
+function setCachedAudio(text, voice, buffer) {
+  const key = `${getTextHash(text)}_${voice}`;
   audioCache.set(key, { buffer, timestamp: Date.now() });
   if (audioCache.size > 100) {
     const oldest = [...audioCache.entries()].sort((a, b) => a[1].timestamp - b[1].timestamp);
@@ -38,22 +38,22 @@ function setCachedAudio(text, voice, accent, buffer) {
   }
 }
 
-async function preGenerateFullAudio(fullText, voice, accent) {
+async function preGenerateFullAudio(fullText, voice) {
   if (!fullText || fullText.length === 0) return;
 
   // Skip background audio pre-generation entirely if there are no push subscribers.
   if (!(await hasAnyPushSubscribers())) {
-    console.log('[AudioPregen] Skipping full TTS – no push subscribers in database');
+    console.log('[AudioPregen] Skipping full TTS - no push subscribers in database');
     return;
   }
 
   const cleanText = fullText.replace(/\n?DEEP_DIVE_TOPICS:\s*\[.*?\]\s*$/, '').trim();
-  const cached = getCachedAudioByText(cleanText, voice, accent);
+  const cached = getCachedAudioByText(cleanText, voice);
   if (!cached) {
     console.log(`[AudioPregen] Starting full TTS (${cleanText.length} chars)...`);
     try {
-      const buffer = await textToSpeech(cleanText, voice, accent);
-      setCachedAudio(cleanText, voice, accent, buffer);
+      const buffer = await textToSpeech(cleanText, voice);
+      setCachedAudio(cleanText, voice, buffer);
       console.log(`[AudioPregen] Cached full audio (${cleanText.length} chars, ${buffer.length} bytes)`);
     } catch (err) {
       console.error('[AudioPregen] Failed:', err.message);
@@ -61,21 +61,21 @@ async function preGenerateFullAudio(fullText, voice, accent) {
   }
 }
 
-async function preGenerateFullAudioAndCache(cleanText, voice, accent, userId) {
+async function preGenerateFullAudioAndCache(cleanText, voice, userId) {
   if (!cleanText || cleanText.length === 0) return;
 
   // Skip background audio pre-generation entirely if there are no push subscribers.
   if (!(await hasAnyPushSubscribers())) {
-    console.log('[AudioPregen] Skipping full TTS cache – no push subscribers in database');
+    console.log('[AudioPregen] Skipping full TTS cache - no push subscribers in database');
     return;
   }
 
-  const cached = getCachedAudioByText(cleanText, voice, accent);
+  const cached = getCachedAudioByText(cleanText, voice);
   if (!cached) {
     console.log(`[AudioPregen] Starting full TTS (${cleanText.length} chars)...`);
     try {
-      const buffer = await textToSpeech(cleanText, voice, accent);
-      setCachedAudio(cleanText, voice, accent, buffer);
+      const buffer = await textToSpeech(cleanText, voice);
+      setCachedAudio(cleanText, voice, buffer);
       console.log(`[AudioPregen] Cached full audio (${cleanText.length} chars, ${buffer.length} bytes)`);
       if (userId) {
         try {
@@ -253,7 +253,7 @@ async function getCachedBriefing(userId) {
     const result = await pool.query('SELECT briefing, topics, sections, audio, generated_at FROM cached_briefings WHERE user_id = $1', [userId]);
     if (result.rows[0]) {
       const row = result.rows[0];
-      const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+      const fifteenMinutesAgo = new Date(Date.now() - 60 * 60 * 1000);
       if (new Date(row.generated_at) > fifteenMinutesAgo) {
         return {
           briefing: row.briefing,
@@ -296,7 +296,7 @@ async function getCachedAudio(userId) {
   try {
     const result = await pool.query('SELECT audio, generated_at FROM cached_briefings WHERE user_id = $1', [userId]);
     if (result.rows[0] && result.rows[0].audio) {
-      const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+      const fifteenMinutesAgo = new Date(Date.now() - 60 * 60 * 1000);
       if (new Date(result.rows[0].generated_at) > fifteenMinutesAgo) {
         return result.rows[0].audio;
       }
@@ -354,9 +354,8 @@ async function preGenerateAndNotify(userId) {
     const articles = await fetchNewsForPreferences(prefs);
     const result = await generateBriefing(articles, prefs);
 
-    const voice = prefs.voice_gender === 'female' ? 'coral' : 'ash';
-    const accent = prefs.voice_accent || 'british';
-    const audioBuffer = await textToSpeech(result.briefing, voice, accent);
+    const voice = prefs.voice_gender === 'female' ? 'nova' : 'onyx';
+    const audioBuffer = await textToSpeech(result.briefing, voice);
 
     await saveCachedBriefing(userId, result.briefing, result.topics, result.sections, audioBuffer);
     console.log('Pre-generated briefing cached for user:', userId);
@@ -548,7 +547,7 @@ const recentBriefingsCache = new Map();
 
 app.post('/api/briefing-stream', async (req, res) => {
   try {
-    const { name, email, topics, regions, outlets, userId, voice, accent, briefingLength } = req.body;
+    const { name, email, topics, regions, outlets, userId, voice, briefingLength } = req.body;
     
     if (!topics || topics.length === 0) {
       return res.status(400).json({ error: 'Please select at least one topic' });
@@ -618,11 +617,11 @@ app.post('/api/briefing-stream', async (req, res) => {
             .catch(err => console.error('Failed to cache on-demand briefing:', err.message));
         }
 
-        if (voice && accent && userId) {
+        if (voice && userId) {
           getPushSubscription(userId).then(subscription => {
             if (subscription) {
               const cleanTextForAudio = fullText.replace(/\n?DEEP_DIVE_TOPICS:\s*\[.*?\]\s*$/, '').trim();
-              preGenerateFullAudioAndCache(cleanTextForAudio, voice, accent, userId);
+              preGenerateFullAudioAndCache(cleanTextForAudio, voice, userId);
             } else {
               console.log('[AudioPregen] Skipping on-demand audio pre-gen — no push subscription for user:', userId);
             }
@@ -698,13 +697,13 @@ app.post('/api/deeper-dive', async (req, res) => {
 
 app.post('/api/tts', async (req, res) => {
   try {
-    const { text, voice = 'ash', accent = 'american' } = req.body;
+    const { text, voice = 'onyx' } = req.body;
     
     if (!text) {
       return res.status(400).json({ error: 'Text is required' });
     }
     
-    const cached = getCachedAudioByText(text, voice, accent);
+    const cached = getCachedAudioByText(text, voice);
     if (cached) {
       console.log('TTS cache hit for text length:', text.length);
       res.set('Content-Type', 'audio/mpeg');
@@ -712,9 +711,9 @@ app.post('/api/tts', async (req, res) => {
       return res.send(cached);
     }
     
-    console.log('TTS cache miss, generating audio for text length:', text.length, 'voice:', voice, 'accent:', accent);
-    const audioBuffer = await textToSpeech(text, voice, accent);
-    setCachedAudio(text, voice, accent, audioBuffer);
+    console.log('TTS cache miss, generating audio for text length:', text.length, 'voice:', voice);
+    const audioBuffer = await textToSpeech(text, voice);
+    setCachedAudio(text, voice, audioBuffer);
     
     res.set('Content-Type', 'audio/mpeg');
     res.set('Content-Length', audioBuffer.length);
@@ -730,14 +729,14 @@ app.post('/api/tts', async (req, res) => {
 
 app.post('/api/tts-full', async (req, res) => {
   try {
-    const { briefingText, voice = 'ash', accent = 'american' } = req.body;
+    const { briefingText, voice = 'onyx' } = req.body;
     
     if (!briefingText) {
       return res.status(400).json({ error: 'Briefing text is required' });
     }
     
     console.log('Generating FULL briefing audio, text length:', briefingText.length);
-    const audioBuffer = await textToSpeech(briefingText, voice, accent);
+    const audioBuffer = await textToSpeech(briefingText, voice);
     console.log('Full briefing audio generated:', audioBuffer.length, 'bytes');
     
     res.set('Content-Type', 'audio/mpeg');

@@ -669,11 +669,9 @@
       <h1 class="logo">Newsy</h1>
       <p class="briefingMeta" id="briefingMeta"></p>
       <p class="instruction" id="briefingInstruction">Your briefing</p>
-      <button class="btn btnPrimary btnFull" id="btnPlayTop" style="margin-top: 18px; display:none;" disabled>Please wait, your briefing is loading.</button>
+      <button class="btn btnPrimary btnFull" id="btnPlay" style="margin-top: 18px; display:none;">Play briefing</button>
 
       <div class="briefingBox" id="briefingText"></div>
-
-      <button class="btn btnPrimary btnFull" id="btnPlay" style="margin-top: 18px; display:none;">Play briefing</button>
 
       <div id="deepDiveSection" class="hidden">
         <p class="instruction" style="margin-top: 26px; font-weight: bold;">Would you like to deep dive into any of these topics?</p>
@@ -1254,6 +1252,10 @@
                         firstTextReceived = true;
                         stopCountdown();
                         briefingTextEl.classList.remove('loading');
+                        const btn = document.getElementById('btnPlay');
+                        btn.style.display = '';
+                        btn.disabled = true;
+                        btn.textContent = 'Please wait, your audio briefing is loading.';
                       }
                       fullText += data.data;
                       briefingTextEl.textContent = fullText;
@@ -1830,7 +1832,10 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('message', async (event) => {
         if (event.data && event.data.type === 'show-notifications') {
-          showLiveAlert();
+          const currentScreen = document.querySelector('section:not(.hidden)');
+          if (currentScreen && currentScreen.id === 's1b') {
+            showLiveAlert();
+          }
         } else if (event.data && event.data.type === 'show-briefing') {
           await loadState();
           if (state.isRegistered) {
@@ -2403,11 +2408,9 @@
       preloadedAudioBlobs = [];
 
       document.getElementById('briefingText').textContent = briefing;
-      document.getElementById('btnPlayTop').textContent = 'Play audio';
-      document.getElementById('btnPlayTop').disabled = false;
-      document.getElementById('btnPlayTop').onclick = () => document.getElementById('btnPlay').click();
-      document.getElementById('btnPlay').textContent = 'Play briefing';
+      document.getElementById('btnPlay').textContent = 'Play Briefing';
       document.getElementById('btnPlay').disabled = false;
+      document.getElementById('btnPlay').style.display = '';
 
       const pillRow = document.getElementById('deepDivePills');
       pillRow.innerHTML = '';
@@ -2437,9 +2440,6 @@
       document.getElementById('briefingInstruction').style.display = 'none';
       document.getElementById('briefingMeta').textContent = getBriefingTimestamp();
       document.getElementById('btnPlay').style.display = 'none';
-      document.getElementById('btnPlayTop').style.display = '';
-      document.getElementById('btnPlayTop').disabled = true;
-      document.getElementById('btnPlayTop').textContent = 'Please wait, your briefing is loading.';
       document.getElementById('deepDiveSection').classList.add('hidden');
       document.getElementById('briefingText').textContent = '';
       show('s9');
@@ -2471,9 +2471,6 @@
       document.getElementById('deepDiveSection').classList.add('hidden');
       document.getElementById('briefingInstruction').style.display = 'none';
       document.getElementById('btnPlay').style.display = 'none';
-      document.getElementById('btnPlayTop').style.display = '';
-      document.getElementById('btnPlayTop').disabled = true;
-      document.getElementById('btnPlayTop').textContent = 'Please wait, your briefing is loading.';
       document.getElementById('briefingText').textContent = '';
       show('s9');
       startCountdown(120);

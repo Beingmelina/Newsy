@@ -1825,7 +1825,8 @@
         } else if (event.data && event.data.type === 'show-briefing') {
           await loadState();
           if (state.isRegistered) {
-            document.getElementById('btnGetBriefing').click();
+            show('s1b');
+            setTimeout(() => document.getElementById('btnGetBriefing').click(), 100);
           } else {
             show('s1');
           }

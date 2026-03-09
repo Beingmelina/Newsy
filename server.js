@@ -253,8 +253,8 @@ async function getCachedBriefing(userId) {
     const result = await pool.query('SELECT briefing, topics, sections, audio, generated_at FROM cached_briefings WHERE user_id = $1', [userId]);
     if (result.rows[0]) {
       const row = result.rows[0];
-      const fifteenMinutesAgo = new Date(Date.now() - 60 * 60 * 1000);
-      if (new Date(row.generated_at) > fifteenMinutesAgo) {
+      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+      if (new Date(row.generated_at) > thirtyMinutesAgo) {
         return {
           briefing: row.briefing,
           topics: row.topics,
@@ -296,8 +296,8 @@ async function getCachedAudio(userId) {
   try {
     const result = await pool.query('SELECT audio, generated_at FROM cached_briefings WHERE user_id = $1', [userId]);
     if (result.rows[0] && result.rows[0].audio) {
-      const fifteenMinutesAgo = new Date(Date.now() - 60 * 60 * 1000);
-      if (new Date(result.rows[0].generated_at) > fifteenMinutesAgo) {
+      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+      if (new Date(result.rows[0].generated_at) > thirtyMinutesAgo) {
         return result.rows[0].audio;
       }
     }

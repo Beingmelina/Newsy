@@ -2505,11 +2505,19 @@
         btn.textContent = audioLoadingTexts[audioLoadIdx];
       }, 5000);
 
+      let audioTimeout;
       const onAudioStarted = () => {
         clearInterval(audioLoadInterval);
+        clearTimeout(audioTimeout);
         btn.disabled = false;
         btn.textContent = 'Pause audio';
       };
+      audioTimeout = setTimeout(() => {
+        clearInterval(audioLoadInterval);
+        isPlaying = false;
+        btn.textContent = 'Try again';
+        btn.disabled = false;
+      }, 45000);
 
       try {
         isPlaying = true;
@@ -2517,7 +2525,10 @@
       } catch(e) {
         clearInterval(audioLoadInterval);
         console.error('Audio playback error:', e);
-        alert('Error playing audio: ' + e.message);
+        isPlaying = false;
+        btn.textContent = 'Try again';
+        btn.disabled = false;
+        return;
       }
 
       isPlaying = false;

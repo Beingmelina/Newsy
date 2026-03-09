@@ -1034,7 +1034,8 @@
     function show(id){
       Object.keys(screens).forEach(k => screens[k].classList.add("hidden"));
       screens[id].classList.remove("hidden");
-      
+      if (id === 's11') updateLogoutButton();
+
       const fixedScreens = ['s1', 's1b'];
       const app = document.getElementById('app');
       if (fixedScreens.includes(id)) {

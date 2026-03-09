@@ -737,7 +737,7 @@
 
       <button class="btn btnPrimary btnFull" id="btnBackToBriefingFromSettings">Back to Briefing</button>
       <button class="btn btnPrimary btnFull" id="btnSettingsBack" style="margin-top: 12px;">Go to Live Updates</button>
-      <button class="btn btnAlt btnFull" id="btnLogout" style="margin-top: 12px;">Log out</button>
+      <button class="btn btnAlt btnFull" id="btnLogout" style="margin-top: 12px;"></button>
     </section>
 
     <!-- Settings sub-screens -->
@@ -2678,11 +2678,25 @@
       showLiveAlert();
     };
 
-    document.getElementById('btnLogout').onclick = () => {
-      localStorage.removeItem(STORAGE_KEY);
-      document.cookie = `${UUID_COOKIE}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-      location.reload();
-    };
+    function updateLogoutButton() {
+      const btn = document.getElementById('btnLogout');
+      if (state.email) {
+        btn.textContent = 'Log out';
+        btn.onclick = () => {
+          localStorage.removeItem(STORAGE_KEY);
+          document.cookie = `${UUID_COOKIE}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+          location.reload();
+        };
+      } else {
+        btn.textContent = 'Log in / Sign up';
+        btn.onclick = () => {
+          show('s2');
+        };
+      }
+    }
+
+    document.getElementById('btnLogout').onclick = () => {};
+    updateLogoutButton();
 
     // Edit Topics
     document.getElementById('btnEditTopics').onclick = () => {

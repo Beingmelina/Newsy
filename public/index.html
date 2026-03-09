@@ -1909,6 +1909,10 @@
     document.getElementById('btnS2').onclick = async () => {
       state.name = document.getElementById('name').value.trim() || "Friend";
       state.email = document.getElementById('email').value.trim();
+      if (!state.email) {
+        alert('Please enter your email to continue. We need it to save your briefing and preferences.');
+        return;
+      }
       
       // If an email is provided, ask the server if this user already exists.
       // If so, load their preferences and skip the rest of onboarding.

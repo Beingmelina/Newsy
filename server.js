@@ -49,6 +49,17 @@ async function preGenerateFullAudio(fullText, voice) {
 
   const cleanText = fullText.replace(/\n?DEEP_DIVE_TOPICS:\s*\[.*?\]\s*$/, '').trim();
   const cached = getCachedAudioByText(cleanText, voice);
+  if (cached && userId) {
+    try {
+      await pool.query(
+        `UPDATE cached_briefings SET audio = $1 WHERE user_id = $2`,
+        [cached, userId]
+      );
+      console.log(`[AudioPregen] Saved existing cached audio to DB for user: ${userId}`);
+    } catch (err) {
+      console.error('[AudioPregen] DB audio save failed:', err.message);
+    }
+  }
   if (!cached) {
     console.log(`[AudioPregen] Starting full TTS (${cleanText.length} chars)...`);
     try {
@@ -71,6 +82,17 @@ async function preGenerateFullAudioAndCache(cleanText, voice, userId) {
   }
 
   const cached = getCachedAudioByText(cleanText, voice);
+  if (cached && userId) {
+    try {
+      await pool.query(
+        `UPDATE cached_briefings SET audio = $1 WHERE user_id = $2`,
+        [cached, userId]
+      );
+      console.log(`[AudioPregen] Saved existing cached audio to DB for user: ${userId}`);
+    } catch (err) {
+      console.error('[AudioPregen] DB audio save failed:', err.message);
+    }
+  }
   if (!cached) {
     console.log(`[AudioPregen] Starting full TTS (${cleanText.length} chars)...`);
     try {

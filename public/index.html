@@ -556,6 +556,7 @@
         <div>
           <p class="fieldLabel">Email</p>
           <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
+          <p id="emailError" style="display:none; margin-top:8px; padding:12px; border:2px solid #000; font-size:13px; color:#000; line-height:1.4;">Please enter your email to curate your briefings and save your preferences.</p>
         </div>
       </div>
 
@@ -1909,10 +1910,12 @@
     document.getElementById('btnS2').onclick = async () => {
       state.name = document.getElementById('name').value.trim() || "Friend";
       state.email = document.getElementById('email').value.trim();
+      const emailErr = document.getElementById('emailError');
       if (!state.email) {
-        alert('Please enter your email to continue. We need it to save your briefing and preferences.');
+        if (emailErr) emailErr.style.display = 'block';
         return;
       }
+      if (emailErr) emailErr.style.display = 'none';
       
       // If an email is provided, ask the server if this user already exists.
       // If so, load their preferences and skip the rest of onboarding.

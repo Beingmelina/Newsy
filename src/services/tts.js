@@ -10,6 +10,7 @@ function cleanTextForTTS(text) {
     .replace(/`(.+?)`/g, '$1')
     .replace(/[-\u2013\u2014]{3,}/g, '')
     .replace(/\n{3,}/g, '\n\n')
+    .replace(/^[A-Z][A-Z\s\/&]{4,}$/gm, '')
     .trim();
 }
 

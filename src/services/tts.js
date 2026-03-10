@@ -1,5 +1,6 @@
 async function textToSpeech(text, voice = 'Craig') {
   console.log('TTS request - voice:', voice);
+  console.log('TTS text preview (first 100 chars):', JSON.stringify(text.substring(0, 100)));
   const apiKey = process.env.INWORLD_API_KEY;
   if (!apiKey) {
     throw new Error('INWORLD_API_KEY environment variable not set');

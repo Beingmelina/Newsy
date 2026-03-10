@@ -16,22 +16,16 @@ async function textToSpeech(text, voice = 'Craig') {
     .replace(/[-\u2013\u2014]{3,}/g, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
-  const response = await fetch('https://api.inworld.ai/tts/v1alpha/text:synthesize', {
+  const response = await fetch('https://api.inworld.ai/tts/v1/voice', {
     method: 'POST',
     headers: {
       'Authorization': `Basic ${apiKey}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      input: {
-        text: cleanText
-      },
-      voice: {
-        name: inworldVoice
-      },
-      audioConfig: {
-        audioEncoding: 'MP3'
-      }
+      text: cleanText,
+      voiceId: inworldVoice,
+      modelId: 'inworld-tts-1.5-mini'
     })
   });
   if (!response.ok) {

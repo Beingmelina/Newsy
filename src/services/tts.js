@@ -14,7 +14,7 @@ function cleanTextForTTS(text) {
 }
 
 function splitIntoChunks(text) {
-  const headerRegex = /(?=\n[A-Z][A-Z\s\/&]{4,}\n)/g;
+  const headerRegex = /(?=\n{1,2}[A-Z][A-Z\s\/&]{4,}\n{1,2})/g;
   const parts = text.split(headerRegex).filter(p => p.trim().length > 0);
   const chunks = [];
   for (const part of parts) {

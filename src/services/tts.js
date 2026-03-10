@@ -23,11 +23,14 @@ async function textToSpeech(text, voice = 'Craig') {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      text: cleanText,
-      voice_id: inworldVoice,
-      model_id: 'inworld-tts-1.5-mini',
-      audio_config: {
-        audio_encoding: 'MP3'
+      input: {
+        text: cleanText
+      },
+      voice: {
+        name: inworldVoice
+      },
+      audioConfig: {
+        audioEncoding: 'MP3'
       }
     })
   });
@@ -37,10 +40,11 @@ async function textToSpeech(text, voice = 'Craig') {
     throw new Error('Inworld TTS failed: ' + errText);
   }
   const data = await response.json();
-  if (!data.audioContent) {
+  const audioContent = data.result?.audioContent || data.audioContent;
+  if (!audioContent) {
     throw new Error('Inworld TTS returned no audio content');
   }
-  const buffer = Buffer.from(data.audioContent, 'base64');
+  const buffer = Buffer.from(audioContent, 'base64');
   console.log('TTS success - audio bytes:', buffer.length, 'voice:', inworldVoice);
   return buffer;
 }

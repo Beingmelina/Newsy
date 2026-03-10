@@ -30,6 +30,10 @@ const RSS_FEEDS = {
     { name: 'Middle East Monitor', url: 'https://www.middleeastmonitor.com/feed/', region: 'Middle East' },
     { name: 'Jerusalem Post', url: 'https://www.jpost.com/rss/rssfeedsfrontpage.aspx', region: 'Middle East' },
     { name: 'Iran International', url: 'https://www.iranintl.com/en/feed', region: 'Middle East' },
+    { name: 'IRNA (Iran State)', url: 'https://en.irna.ir/rss', region: 'Middle East' },
+    { name: 'Tasnim News', url: 'https://www.tasnimnews.com/en/rss', region: 'Middle East' },
+    { name: 'Fars News', url: 'https://www.farsnews.ir/rss', region: 'Middle East' },
+    { name: 'PressTV', url: 'https://www.presstv.ir/rss', region: 'Middle East' },
     { name: 'NYT Middle East', url: 'https://rss.nytimes.com/services/xml/rss/nyt/MiddleEast.xml', region: 'Middle East' },
     { name: 'Guardian Middle East', url: 'https://www.theguardian.com/world/middleeast/rss', region: 'Middle East' },
 

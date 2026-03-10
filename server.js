@@ -1216,8 +1216,8 @@ const server = app.listen(PORT, '0.0.0.0', async () => {
   }
 
   await rescheduleAllNotifications();
-
-  startLivePoller(sendLiveUpdateToSubscribers);
+ 
+  startLivePoller(sendLiveUpdateToSubscribers, pool);
 });
 
 function gracefulShutdown(signal) {

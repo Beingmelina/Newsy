@@ -16,6 +16,10 @@ const LIVE_FEEDS = [
   { name: 'Al Jazeera', url: 'https://www.aljazeera.com/xml/rss/all.xml', lang: 'en', type: 'wire' },
   { name: 'Jerusalem Post', url: 'https://www.jpost.com/rss/rssfeedsfrontpage.aspx', lang: 'en', type: 'regional' },
   { name: 'Iran International', url: 'https://www.iranintl.com/en/feed', lang: 'en', type: 'regional' },
+  { name: 'IRNA (Iran State)', url: 'https://en.irna.ir/rss', lang: 'en', type: 'state' },
+  { name: 'Tasnim News', url: 'https://www.tasnimnews.com/en/rss', lang: 'en', type: 'state' },
+  { name: 'Fars News', url: 'https://www.farsnews.ir/rss', lang: 'en', type: 'state' },
+  { name: 'PressTV', url: 'https://www.presstv.ir/rss', lang: 'en', type: 'state' },
   { name: 'Middle East Monitor', url: 'https://www.middleeastmonitor.com/feed/', lang: 'en', type: 'regional' },
   { name: 'The National (UAE)', url: 'https://www.thenationalnews.com/arc/outboundfeeds/rss/?outputType=xml', lang: 'en', type: 'state' },
   { name: 'Guardian Middle East', url: 'https://www.theguardian.com/world/middleeast/rss', lang: 'en', type: 'wire' },
@@ -185,7 +189,7 @@ function isDuplicateEvent(newTitle) {
     const sentWords = sentTitle.toLowerCase().split(/\s+/).filter(w => w.length > 4);
     const overlap = newWords.filter(w => sentWords.includes(w)).length;
     const similarity = overlap / Math.max(newWords.length, sentWords.length);
-    if (similarity >= 0.5) return true;
+    if (similarity >= 0.7) return true;
   }
   return false;
 }
@@ -266,10 +270,26 @@ if (status === 'UNCONFIRMED') body = `Via ${article.source}`;
   console.log(`[LivePoller] Poll complete: ${allArticles.length} articles, ${newArticles.length} new, ${tierA.length} Tier A, ${tierB.length} Tier B (${elapsed}ms)`);
 }
 
-function startLivePoller(sendNotificationCallback) {
+async function startLivePoller(sendNotificationCallback, pool) {
   if (isRunning) {
     console.log('[LivePoller] Already running');
     return;
+  }
+
+  if (pool) {
+    try {
+      const recent = await pool.query(
+        `SELECT title, source FROM live_alerts WHERE created_at > NOW() - INTERVAL '24 hours'`
+      );
+      for (const row of recent.rows) {
+        const id = `${row.source}:${row.title}`;
+        seenArticles.add(id);
+        sentAlertEvents.set(row.title, Date.now());
+      }
+      console.log(`[LivePoller] Pre-loaded ${recent.rows.length} recent alerts from DB`);
+    } catch (err) {
+      console.error('[LivePoller] Failed to pre-load seen articles:', err.message);
+    }
   }
 
   console.log(`[LivePoller] Starting (polling every ${POLL_INTERVAL_MS / 1000}s)`);

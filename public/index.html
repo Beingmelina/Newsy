@@ -2093,7 +2093,7 @@
     document.getElementById('btnOnboardLiveYes').onclick = async () => {
       try {
         if (!('Notification' in window) || !('PushManager' in window)) {
-          alert('Notifications are not supported in this browser. Please save to Home Screen to enable them.');
+          showA2HS();
           state.liveUpdatesDeclined = true;
           saveState();
           show('s8');
@@ -2143,7 +2143,7 @@
       
       if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
         console.log('Push notifications not supported in this browser');
-        if (!silent) alert('Notifications are not supported in this browser. Please save to Home Screen to enable them.');
+        if (!silent) showA2HS();
         return false;
       }
 
@@ -2808,7 +2808,7 @@
 
     document.getElementById('btnEditLiveYes').onclick = async () => {
       if (!('Notification' in window) || !('PushManager' in window)) {
-        alert('Notifications are not supported in this browser. Please save to Home Screen to enable them.');
+        showA2HS();
         return;
       }
 

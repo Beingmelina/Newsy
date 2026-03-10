@@ -5,6 +5,16 @@ async function textToSpeech(text, voice = 'Craig') {
     throw new Error('INWORLD_API_KEY environment variable not set');
   }
   const inworldVoice = (voice === 'nova') ? 'Ashley' : 'Craig';
+  const cleanText = text
+    .replace(/#{1,6}\s+/g, '')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/_{1,2}(.+?)_{1,2}/g, '$1')
+    .replace(/\[(.+?)\]\(.+?\)/g, '$1')
+    .replace(/`(.+?)`/g, '$1')
+    .replace(/[-\u2013\u2014]{3,}/g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
   const response = await fetch('https://api.inworld.ai/tts/v1alpha/text:synthesize', {
     method: 'POST',
     headers: {
@@ -12,7 +22,7 @@ async function textToSpeech(text, voice = 'Craig') {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      text: text,
+      text: cleanText,
       voice_id: inworldVoice,
       model_id: 'inworld-tts-1.5-mini',
       audio_config: {

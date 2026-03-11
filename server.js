@@ -8,6 +8,7 @@ const { fetchNewsForPreferences } = require('./src/services/newsService');
 const { generateBriefing, generateBriefingStream, generateDeepDive, generateDeeperDive } = require('./src/services/anthropic');
 const { textToSpeech } = require('./src/services/tts');
 const { startLivePoller, stopLivePoller, getLivePollerStatus } = require('./src/services/livePoller');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -1312,6 +1313,146 @@ const server = app.listen(PORT, '0.0.0.0', async () => {
  
   startLivePoller(sendLiveUpdateToSubscribers, pool);
 });
+
+// ============ ADMIN DASHBOARD ============
+const ADMIN_SECRET = process.env.ADMIN_PASSWORD || 'changeme';
+
+function requireAdmin(req, res, next) {
+  const auth = req.headers['authorization'];
+  if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ error: 'Unauthorised' });
+  try {
+    jwt.verify(auth.slice(7), ADMIN_SECRET);
+    next();
+  } catch (e) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+}
+
+app.post('/admin/api/login', (req, res) => {
+  const { password } = req.body;
+  if (password !== ADMIN_SECRET) return res.status(401).json({ error: 'Wrong password' });
+  const token = jwt.sign({ admin: true }, ADMIN_SECRET, { expiresIn: '24h' });
+  res.json({ token });
+});
+
+app.get('/admin/api/stats', requireAdmin, async (req, res) => {
+  try {
+    const users = await pool.query(`SELECT COUNT(DISTINCT LOWER(email)) as total FROM user_preferences WHERE email != ''`);
+    const briefings = await pool.query(`SELECT COUNT(*) as total FROM analytics_events WHERE event_type = 'briefing_generated'`);
+    const audioPlays = await pool.query(`SELECT COUNT(*) as total FROM analytics_events WHERE event_type IN ('briefing_audio_played','deep_dive_audio_played','deeper_dive_audio_played')`);
+    res.json({
+      totalUsers: users.rows[0].total,
+      totalBriefings: briefings.rows[0].total,
+      totalAudioPlays: audioPlays.rows[0].total
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/admin/api/user-growth', requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT DATE(created_at) as date, COUNT(DISTINCT LOWER(email)) as signups
+      FROM user_preferences
+      WHERE email != '' AND created_at >= NOW() - INTERVAL '30 days'
+      GROUP BY DATE(created_at)
+      ORDER BY date ASC
+    `);
+    res.json(result.rows);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/admin/api/engagement', requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        DATE(created_at) as date,
+        COUNT(*) FILTER (WHERE event_type = 'briefing_generated') as briefings,
+        COUNT(*) FILTER (WHERE event_type = 'deep_dive_generated') as deep_dives,
+        COUNT(*) FILTER (WHERE event_type = 'deeper_dive_generated') as deeper_dives,
+        COUNT(*) FILTER (WHERE event_type = 'briefing_audio_played') as briefing_plays,
+        COUNT(*) FILTER (WHERE event_type = 'deep_dive_audio_played') as deep_dive_plays,
+        COUNT(*) FILTER (WHERE event_type = 'deeper_dive_audio_played') as deeper_dive_plays
+      FROM analytics_events
+      WHERE created_at >= NOW() - INTERVAL '30 days'
+      GROUP BY DATE(created_at)
+      ORDER BY date ASC
+    `);
+    res.json(result.rows);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/admin/api/users', requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        LOWER(up.email) as email,
+        MIN(up.created_at) as signup_date,
+        MAX(up.last_active_at) as last_active,
+        COUNT(DISTINCT ae.id) FILTER (WHERE ae.event_type = 'briefing_generated') as total_briefings,
+        COUNT(DISTINCT ae.id) FILTER (WHERE ae.event_type = 'deep_dive_generated') as total_deep_dives,
+        CASE
+          WHEN MAX(up.last_active_at) >= NOW() - INTERVAL '7 days' THEN 'Active'
+          WHEN MAX(up.last_active_at) >= NOW() - INTERVAL '30 days' THEN 'At Risk'
+          ELSE 'Ghost'
+        END as status
+      FROM user_preferences up
+      LEFT JOIN users u ON LOWER(up.email) = LOWER(u.email)
+      LEFT JOIN analytics_events ae ON ae.user_id = u.id
+      WHERE up.email != ''
+      GROUP BY LOWER(up.email)
+      ORDER BY last_active DESC NULLS LAST
+    `);
+    res.json(result.rows);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/admin/api/dropoff', requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        LOWER(email) as email,
+        MIN(created_at) as signup_date,
+        MAX(last_active_at) as last_active
+      FROM user_preferences
+      WHERE email != ''
+      AND (
+        last_active_at < NOW() - INTERVAL '7 days'
+        OR (last_active_at IS NULL AND created_at < NOW() - INTERVAL '7 days')
+      )
+      GROUP BY LOWER(email)
+      ORDER BY last_active ASC NULLS FIRST
+    `);
+    res.json(result.rows);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/admin/api/feedback', requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT name, email, message, created_at
+      FROM feedback
+      ORDER BY created_at DESC
+    `);
+    res.json(result.rows);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+// ============ END ADMIN DASHBOARD ============
 
 function gracefulShutdown(signal) {
   console.log(`\n${signal} received. Shutting down gracefully...`);

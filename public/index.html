@@ -701,6 +701,17 @@
       <button class="btn btnAlt btnFull" id="btnBackToBriefing" style="margin-top: 18px;">Back</button>
     </section>
 
+    <section id="s10b" class="hidden">
+      <button class="settingsBtn" id="btnSettingsDeepDive2" title="Settings"><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
+      <h1 class="logo">Newsy</h1>
+      <p class="instruction">Deeper dive</p>
+
+      <div class="briefingBox" id="deeperDiveText"></div>
+
+      <button class="btn btnPrimary btnFull" id="btnPlayDeeperDive">Play deeper dive</button>
+      <button class="btn btnAlt btnFull" id="btnBack" style="margin-top: 18px;">Back to deep dive</button>
+    </section>
+
     <section id="sLiveAlert" class="hidden">
       <button class="settingsBtn" id="btnSettingsLiveAlert" title="Settings"><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
       <h1 class="logo">Newsy</h1>
@@ -1058,7 +1069,7 @@
     }
 
     const screens = [
-      "s1","s1b","s2","s4","s5","s6","s6b","s7","s7b","s8","s9","s10","s11",
+      "s1","s1b","s2","s4","s5","s6","s6b","s7","s7b","s8","s9","s10","s10b","s11",
       "sLiveAlert","sLiveEnable","sLiveConfirm","sEditTopics","sEditRegions","sEditVoice","sEditLength","sEditSchedule","sEditLiveUpdates","sFeedback","sAbout"
     ].reduce((acc,id)=>{
       acc[id] = document.getElementById(id);
@@ -2699,39 +2710,77 @@
 
     document.getElementById('btnGoDeeper').onclick = async () => {
       const btn = document.getElementById('btnGoDeeper');
-      const origText = btn.textContent;
       btn.textContent = 'Going deeper...';
       btn.disabled = true;
-      
-      document.getElementById('deepDiveText').textContent = 'Generating deeper analysis...';
-      
+      if (currentAudio) { currentAudio.pause(); isDivePlaying = false; }
+      document.getElementById('deeperDiveText').textContent = 'Generating deeper analysis...';
+      show('s10b');
       try {
         const res = await fetch('/api/deeper-dive', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            topic: state.currentDeepDiveTopic, 
+          body: JSON.stringify({
+            topic: state.currentDeepDiveTopic,
             previousDive: state.currentDeepDiveText
           })
         });
-        
         if (!res.ok) throw new Error('Deeper dive failed');
-        
         const data = await res.json();
         state.currentDeepDiveText = data.deeperDive;
-        renderDeepDiveText('deepDiveText', data.deeperDive);
-        btn.style.display = 'none';
+        renderDeepDiveText('deeperDiveText', data.deeperDive);
       } catch(e) {
         console.error('Deeper dive error:', e);
-        document.getElementById('deepDiveText').textContent = 'Error generating deeper analysis.';
+        document.getElementById('deeperDiveText').textContent = 'Error generating deeper analysis.';
       }
-      
-      btn.textContent = origText;
+      btn.textContent = 'Go deeper';
       btn.disabled = false;
     };
 
     document.getElementById('btnBackToBriefing').onclick = () => show('s9');
-
+    document.getElementById('btnBack').onclick = () => {
+      if (currentAudio) { currentAudio.pause(); isDivePlaying = false; }
+      show('s10');
+    };
+    document.getElementById('btnPlayDeeperDive').onclick = async () => {
+      const btn = document.getElementById('btnPlayDeeperDive');
+      if (isDivePlaying && currentAudio) {
+        currentAudio.pause();
+        isDivePlaying = false;
+        btn.textContent = 'Resume deeper dive';
+        return;
+      }
+      if (btn.textContent === 'Resume deeper dive' && currentAudio) {
+        currentAudio.play();
+        isDivePlaying = true;
+        btn.textContent = 'Pause audio';
+        return;
+      }
+      btn.textContent = 'Loading audio ...';
+      btn.disabled = true;
+      const loadTexts = ['Loading audio ...', 'Working on it ...', 'Any second now ...', 'Almost there ...', 'Good things come to those who wait ...'];
+      let loadIdx = 0;
+      const loadInterval = setInterval(() => {
+        loadIdx = (loadIdx + 1) % loadTexts.length;
+        btn.textContent = loadTexts[loadIdx];
+      }, 5000);
+      const onAudioStarted = () => {
+        clearInterval(loadInterval);
+        btn.disabled = false;
+        btn.textContent = 'Pause audio';
+      };
+      try {
+        isDivePlaying = true;
+        const text = document.getElementById('deeperDiveText').textContent;
+        await playAudio(text, onAudioStarted);
+      } catch(e) {
+        clearInterval(loadInterval);
+        console.error('Deeper dive audio error:', e);
+        alert('Error playing audio: ' + e.message);
+      }
+      isDivePlaying = false;
+      btn.textContent = 'Play deeper dive';
+      btn.disabled = false;
+    };
     function renderDeepDiveText(elementId, text) {
       const el = document.getElementById(elementId);
       const html = text
@@ -2745,6 +2794,7 @@
     document.getElementById('btnSettings').onclick = () => show('s11');
     document.getElementById('btnSettingsBriefing').onclick = () => show('s11');
     document.getElementById('btnSettingsDeepDive').onclick = () => show('s11');
+    document.getElementById('btnSettingsDeepDive2').onclick = () => show('s11');
     document.getElementById('btnSettingsLiveAlert').onclick = () => show('s11');
     document.getElementById('btnBackToBriefingFromSettings').onclick = () => show('s9');
     document.getElementById('btnSettingsBack').onclick = () => {

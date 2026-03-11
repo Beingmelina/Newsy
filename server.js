@@ -556,6 +556,25 @@ app.post('/api/briefing', async (req, res) => {
       articleCount: articles.length,
       sourceCount: uniqueSources
     });
+    if (email) {
+      try {
+        const userResult = await pool.query(
+          `SELECT user_id FROM user_preferences WHERE LOWER(email) = LOWER($1) LIMIT 1`,
+          [email]
+        );
+        if (userResult.rows.length > 0) {
+          const userId = userResult.rows[0].user_id;
+          await pool.query(
+            `INSERT INTO analytics_events (user_id, event_type, metadata, created_at) VALUES ($1, $2, $3, NOW())`,
+            [userId, 'briefing_generated', JSON.stringify({ topics })]
+          );
+          await pool.query(
+            `UPDATE user_preferences SET last_active_at = NOW() WHERE user_id = $1`,
+            [userId]
+          );
+        }
+      } catch (e) { /* silent */ }
+    }
   } catch (error) {
     console.error('Briefing error:', error);
     res.status(500).json({ 
@@ -684,6 +703,19 @@ app.post('/api/deep-dive', async (req, res) => {
       success: true,
       deepDive
     });
+    const { userId } = req.body;
+    if (userId) {
+      try {
+        await pool.query(
+          `INSERT INTO analytics_events (user_id, event_type, metadata, created_at) VALUES ($1, $2, $3, NOW())`,
+          [userId, 'deep_dive_generated', JSON.stringify({ topics: topicList })]
+        );
+        await pool.query(
+          `UPDATE user_preferences SET last_active_at = NOW() WHERE user_id = $1`,
+          [userId]
+        );
+      } catch (e) { /* silent */ }
+    }
   } catch (error) {
     console.error('Deep dive error:', error);
     res.status(500).json({ 
@@ -708,6 +740,19 @@ app.post('/api/deeper-dive', async (req, res) => {
       success: true,
       deeperDive
     });
+    const { userId } = req.body;
+    if (userId) {
+      try {
+        await pool.query(
+          `INSERT INTO analytics_events (user_id, event_type, metadata, created_at) VALUES ($1, $2, $3, NOW())`,
+          [userId, 'deeper_dive_generated', JSON.stringify({ topic })]
+        );
+        await pool.query(
+          `UPDATE user_preferences SET last_active_at = NOW() WHERE user_id = $1`,
+          [userId]
+        );
+      } catch (e) { /* silent */ }
+    }
   } catch (error) {
     console.error('Deeper dive error:', error);
     res.status(500).json({ 
@@ -1208,6 +1253,13 @@ app.get('/api/live-alerts', async (req, res) => {
       `SELECT title, source, url, created_at FROM live_alerts ORDER BY created_at DESC LIMIT 50`
     );
     res.json({ alerts: result.rows });
+    const userId = req.query.userId;
+    if (userId) {
+      try {
+        await pool.query(`INSERT INTO analytics_events (user_id, event_type, metadata, created_at) VALUES ($1, $2, $3, NOW())`, [userId, 'alerts_viewed', JSON.stringify({})]);
+        await pool.query(`UPDATE user_preferences SET last_active_at = NOW() WHERE user_id = $1`, [userId]);
+      } catch (e) { /* silent */ }
+    }
   } catch (err) {
     console.error('[LiveAlerts] Fetch error:', err.message);
     res.status(500).json({ error: 'Failed to fetch alerts' });
@@ -1217,7 +1269,21 @@ app.get('/api/live-alerts', async (req, res) => {
 app.get('/api/live-poller-status', (req, res) => {
   res.json(getLivePollerStatus());
 });
-
+app.post('/api/track-event', async (req, res) => {
+  res.json({ success: true });
+  const { userId, eventType, metadata } = req.body;
+  if (!userId || !eventType) return;
+  try {
+    await pool.query(
+      `INSERT INTO analytics_events (user_id, event_type, metadata, created_at) VALUES ($1, $2, $3, NOW())`,
+      [userId, eventType, JSON.stringify(metadata || {})]
+    );
+    await pool.query(
+      `UPDATE user_preferences SET last_active_at = NOW() WHERE user_id = $1`,
+      [userId]
+    );
+  } catch (e) { /* silent */ }
+});
 const server = app.listen(PORT, '0.0.0.0', async () => {
   console.log(`Newsy server running on port ${PORT}`);
   console.log(`Anthropic AI configured: ${!!process.env.ANTHROPIC_API_KEY}`);
@@ -1232,8 +1298,11 @@ const server = app.listen(PORT, '0.0.0.0', async () => {
     await pool.query(`CREATE TABLE IF NOT EXISTS translation_cache (article_id TEXT PRIMARY KEY, original_title TEXT, translated_title TEXT, translated_description TEXT, lang TEXT, created_at TIMESTAMP DEFAULT NOW())`);
     await pool.query(`CREATE TABLE IF NOT EXISTS live_alerts (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), title TEXT, source TEXT, url TEXT, created_at TIMESTAMP DEFAULT NOW())`);
     await pool.query(`ALTER TABLE live_alerts ADD COLUMN IF NOT EXISTS url TEXT`);
+    await pool.query(`ALTER TABLE user_preferences ADD COLUMN IF NOT EXISTS last_active_at TIMESTAMP`);
     await pool.query(`CREATE TABLE IF NOT EXISTS feedback (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID REFERENCES users(id), name TEXT, email TEXT, message TEXT, created_at TIMESTAMP DEFAULT NOW())`);
     await pool.query(`CREATE TABLE IF NOT EXISTS analytics_events (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID REFERENCES users(id), event_type TEXT, metadata JSONB, created_at TIMESTAMP DEFAULT NOW())`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_analytics_events_user_id ON analytics_events (user_id)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_analytics_events_created_at ON analytics_events (created_at)`);
     console.log('Database tables ready');
   } catch (e) {
     console.error('Table creation error:', e.message);

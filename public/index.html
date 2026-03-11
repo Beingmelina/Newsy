@@ -1834,7 +1834,7 @@
       const res = await fetch('/api/deep-dive', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topics, briefing })
+        body: JSON.stringify({ topics, briefing, userId: state.uuid })
       });
       if(!res.ok) throw new Error('Deep dive failed');
       return res.json();
@@ -1847,7 +1847,7 @@
       if (window._liveAlertInterval) clearInterval(window._liveAlertInterval);
       window._liveAlertInterval = setInterval(showLiveAlert, 30000);
       try {
-        const res = await fetch('/api/live-alerts?t=' + Date.now());
+        const res = await fetch('/api/live-alerts?t=' + Date.now() + '&userId=' + (state.uuid || ''));
         const data = await res.json();
         feed.innerHTML = '';
         if (!data.alerts || data.alerts.length === 0) {
@@ -2623,6 +2623,7 @@
 
       try {
         isPlaying = true;
+        fetch('/api/track-event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: state.uuid, eventType: 'briefing_audio_played' }) }).catch(() => {});
         await playAudio(state.lastBriefingText, onAudioStarted);
       } catch(e) {
         clearInterval(audioLoadInterval);
@@ -2696,6 +2697,7 @@
 
       try {
         isDivePlaying = true;
+        fetch('/api/track-event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: state.uuid, eventType: 'deep_dive_audio_played' }) }).catch(() => {});
         const text = document.getElementById('deepDiveText').textContent;
         await playAudio(text, onAudioStarted);
       } catch(e) {
@@ -2722,7 +2724,8 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             topic: state.currentDeepDiveTopic,
-            previousDive: state.currentDeepDiveText
+            previousDive: state.currentDeepDiveText,
+            userId: state.uuid
           })
         });
         if (!res.ok) throw new Error('Deeper dive failed');
@@ -2771,6 +2774,7 @@
       };
       try {
         isDivePlaying = true;
+        fetch('/api/track-event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: state.uuid, eventType: 'deeper_dive_audio_played' }) }).catch(() => {});
         const text = document.getElementById('deeperDiveText').textContent;
         await playAudio(text, onAudioStarted);
       } catch(e) {

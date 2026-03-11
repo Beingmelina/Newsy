@@ -1232,6 +1232,8 @@ const server = app.listen(PORT, '0.0.0.0', async () => {
     await pool.query(`CREATE TABLE IF NOT EXISTS translation_cache (article_id TEXT PRIMARY KEY, original_title TEXT, translated_title TEXT, translated_description TEXT, lang TEXT, created_at TIMESTAMP DEFAULT NOW())`);
     await pool.query(`CREATE TABLE IF NOT EXISTS live_alerts (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), title TEXT, source TEXT, url TEXT, created_at TIMESTAMP DEFAULT NOW())`);
     await pool.query(`ALTER TABLE live_alerts ADD COLUMN IF NOT EXISTS url TEXT`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS feedback (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID REFERENCES users(id), name TEXT, email TEXT, message TEXT, created_at TIMESTAMP DEFAULT NOW())`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS analytics_events (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID REFERENCES users(id), event_type TEXT, metadata JSONB, created_at TIMESTAMP DEFAULT NOW())`);
     console.log('Database tables ready');
   } catch (e) {
     console.error('Table creation error:', e.message);

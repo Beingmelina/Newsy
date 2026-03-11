@@ -1069,10 +1069,22 @@
       return acc;
     }, {});
 
+    function showToast(message) {
+      const existing = document.getElementById('toastBanner');
+      if (existing) existing.remove();
+      const toast = document.createElement('div');
+      toast.id = 'toastBanner';
+      toast.textContent = message;
+      toast.style.cssText = 'position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#000;color:#fff;padding:14px 24px;font-size:15px;border-radius:4px;z-index:99999;text-align:center;max-width:320px;';
+      document.body.appendChild(toast);
+    }
+
     function show(id){
       Object.keys(screens).forEach(k => screens[k].classList.add("hidden"));
       screens[id].classList.remove("hidden");
       if (id === 's11') updateLogoutButton();
+      const toast = document.getElementById('toastBanner');
+      if (toast) toast.remove();
 
       const fixedScreens = ['s1', 's1b'];
       const app = document.getElementById('app');
@@ -2861,21 +2873,26 @@
       document.getElementById('btnDisableLiveUpdates').classList.remove('hidden');
     };
 
-    document.getElementById('btnEditLiveNo').onclick = () => {
+    async function disableLiveAlerts() {
+      try {
+        await fetch('/api/unsubscribe-live-updates', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: state.uuid })
+        });
+      } catch (err) {
+        console.error('Failed to unsubscribe live alerts:', err);
+      }
       state.liveUpdatesSubscribed = false;
       state.liveUpdatesDeclined = true;
       saveState();
+      showToast('Your live alerts are now turned off');
       show('s11');
-    };
+    }
 
-    document.getElementById('btnDisableLiveUpdates').onclick = () => {
-      state.liveUpdatesSubscribed = false;
-      state.liveUpdatesDeclined = true;
-      saveState();
-      document.getElementById('liveUpdatesEditStatus').classList.add('hidden');
-      document.getElementById('liveUpdatesEditBtns').style.display = '';
-      document.getElementById('btnDisableLiveUpdates').classList.add('hidden');
-    };
+    document.getElementById('btnEditLiveNo').onclick = () => disableLiveAlerts();
+
+    document.getElementById('btnDisableLiveUpdates').onclick = () => disableLiveAlerts();
 
     document.getElementById('btnEditLiveBack').onclick = () => {
       show('s11');

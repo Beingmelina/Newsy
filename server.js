@@ -905,6 +905,28 @@ app.get('/api/cached-audio/:userId', async (req, res) => {
   res.send(audio);
 });
 
+app.post('/api/unsubscribe-live-updates', async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) {
+      return res.status(400).json({ error: 'userId required' });
+    }
+    await pool.query(
+      `DELETE FROM live_update_subscriptions WHERE user_id = $1`,
+      [userId]
+    );
+    await pool.query(
+      `UPDATE user_preferences SET live_updates_subscribed = false, live_updates_declined = true, updated_at = NOW() WHERE user_id = $1`,
+      [userId]
+    );
+    console.log('Live update unsubscribed for user:', userId);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Live update unsubscribe error:', error);
+    res.status(500).json({ error: 'Failed to unsubscribe' });
+  }
+});
+
 app.post('/api/subscribe-live-updates', async (req, res) => {
   try {
     const { userId, topic } = req.body;

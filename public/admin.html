@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Newsy — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: #e8e6e0;
+    --text: #1a1a18;
+    --muted: #888880;
+    --accent: #2a2a22;
+    --active: #2d6a4f;
+    --atrisk: #e07a24;
+    --ghost: #b0aea6;
+    --tag-bg: #f0efe9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 400; min-height: 100vh; }
+  #login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 32px; }
+  .login-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 48px 40px; width: 100%; max-width: 400px; box-shadow: 0 2px 24px rgba(0,0,0,0.06); }
+  .login-logo { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--text); margin-bottom: 4px; }
+  .login-sub { font-size: 13px; color: var(--muted); margin-bottom: 32px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .login-card input[type="password"] { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 15px; background: var(--bg); color: var(--text); outline: none; margin-bottom: 12px; transition: border-color 0.2s; }
+  .login-card input[type="password"]:focus { border-color: var(--accent); }
+  .login-card button { width: 100%; padding: 12px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; transition: opacity 0.2s; }
+  .login-card button:hover { opacity: 0.85; }
+  .login-error { color: #c0392b; font-size: 13px; margin-top: 10px; display: none; }
+  #dashboard { display: none; }
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 40px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+  .header-logo { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text); }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .header-tag { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); background: var(--tag-bg); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); }
+  .logout-btn { font-size: 13px; color: var(--muted); cursor: pointer; background: none; border: none; font-family: 'DM Sans', sans-serif; transition: color 0.2s; }
+  .logout-btn:hover { color: var(--text); }
+  main { max-width: 1200px; margin: 0 auto; padding: 40px 40px 80px; }
+  .section-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--text); margin-bottom: 20px; margin-top: 48px; }
+  .section-title:first-child { margin-top: 0; }
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; }
+  .stat-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 10px; }
+  .stat-value { font-family: 'DM Serif Display', serif; font-size: 40px; color: var(--text); line-height: 1; }
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; }
+  .chart-card-title { font-size: 13px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 20px; }
+  .chart-wrap { position: relative; height: 220px; }
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead th { text-align: left; padding: 14px 20px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--border); background: var(--bg); }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg); }
+  tbody td { padding: 13px 20px; color: var(--text); vertical-align: middle; }
+  .email-cell { font-weight: 500; }
+  .status-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+  .status-Active { background: #e8f5ee; color: var(--active); }
+  .status-atrisk { background: #fef3e8; color: var(--atrisk); }
+  .status-Ghost { background: #f2f1ee; color: var(--ghost); }
+  .feedback-list { display: flex; flex-direction: column; gap: 12px; }
+  .feedback-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
+  .feedback-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .feedback-name { font-weight: 600; font-size: 14px; }
+  .feedback-email { font-size: 12px; color: var(--muted); }
+  .feedback-date { font-size: 12px; color: var(--muted); margin-left: auto; }
+  .feedback-msg { font-size: 14px; color: var(--text); line-height: 1.6; }
+  .empty-state { text-align: center; padding: 48px; color: var(--muted); font-size: 14px; }
+  .loading { text-align: center; padding: 60px; color: var(--muted); font-size: 14px; letter-spacing: 0.04em; }
+  .dropoff-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .dropoff-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+  .dropoff-email { font-size: 13px; font-weight: 500; margin-bottom: 6px; word-break: break-all; }
+  .dropoff-meta { font-size: 12px; color: var(--muted); }
+  @media (max-width: 768px) {
+    main { padding: 24px 20px 60px; }
+    header { padding: 0 20px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .charts-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">Newsy</div>
+    <div class="login-sub">Admin Dashboard</div>
+    <input type="password" id="pw-input" placeholder="Password" />
+    <button onclick="doLogin()">Enter</button>
+    <div class="login-error" id="login-error">Incorrect password.</div>
+  </div>
+</div>
+
+<div id="dashboard">
+  <header>
+    <span class="header-logo">Newsy</span>
+    <div class="header-right">
+      <span class="header-tag">Admin</span>
+      <button class="logout-btn" onclick="doLogout()">Log out</button>
+    </div>
+  </header>
+  <main>
+    <div id="dash-content" class="loading">Loading data…</div>
+  </main>
+</div>
+
+<script>
+  let TOKEN = localStorage.getItem('newsy_admin_token') || '';
+
+  document.getElementById('pw-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  async function doLogin() {
+    const pw = document.getElementById('pw-input').value.trim();
+    if (!pw) return;
+    try {
+      const r = await fetch('/admin/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw })
+      });
+      if (!r.ok) { document.getElementById('login-error').style.display = 'block'; return; }
+      const { token } = await r.json();
+      TOKEN = token;
+      localStorage.setItem('newsy_admin_token', token);
+      showDashboard();
+    } catch (e) {
+      document.getElementById('login-error').style.display = 'block';
+    }
+  }
+
+  function doLogout() {
+    localStorage.removeItem('newsy_admin_token');
+    TOKEN = '';
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('pw-input').value = '';
+  }
+
+  function authHeaders() {
+    return { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' };
+  }
+
+  async function apiFetch(path) {
+    const r = await fetch(path, { headers: authHeaders() });
+    if (r.status === 401) { doLogout(); throw new Error('Unauthorised'); }
+    return r.json();
+  }
+
+  window.addEventListener('load', () => {
+    if (TOKEN) showDashboard();
+  });
+
+  async function showDashboard() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    await loadAll();
+  }
+
+  async function loadAll() {
+    try {
+      const [stats, growth, engagement, users, dropoff, feedback] = await Promise.all([
+        apiFetch('/admin/api/stats'),
+        apiFetch('/admin/api/user-growth'),
+        apiFetch('/admin/api/engagement'),
+        apiFetch('/admin/api/users'),
+        apiFetch('/admin/api/dropoff'),
+        apiFetch('/admin/api/feedback')
+      ]);
+      renderAll(stats, growth, engagement, users, dropoff, feedback);
+    } catch (e) {
+      if (e.message !== 'Unauthorised') {
+        document.getElementById('dash-content').innerHTML = '<div class="empty-state">Failed to load data. Check Railway logs.</div>';
+      }
+    }
+  }
+
+  function fmt(dateStr) {
+    if (!dateStr) return '—';
+    return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function renderAll(stats, growth, engagement, users, dropoff, feedback) {
+    const c = document.getElementById('dash-content');
+    c.className = '';
+    c.innerHTML = `
+      <div class="section-title">Overview</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value">${stats.totalUsers || 0}</div></div>
+        <div class="stat-card"><div class="stat-label">Briefings Generated</div><div class="stat-value">${stats.totalBriefings || 0}</div></div>
+        <div class="stat-card"><div class="stat-label">Audio Plays</div><div class="stat-value">${stats.totalAudioPlays || 0}</div></div>
+      </div>
+      <div class="section-title">30-Day Trends</div>
+      <div class="charts-grid">
+        <div class="chart-card"><div class="chart-card-title">New Signups</div><div class="chart-wrap"><canvas id="chart-growth"></canvas></div></div>
+        <div class="chart-card"><div class="chart-card-title">Engagement</div><div class="chart-wrap"><canvas id="chart-engagement"></canvas></div></div>
+      </div>
+      <div class="section-title">All Users</div>
+      <div class="table-wrap">${renderUserTable(users)}</div>
+      <div class="section-title">Drop-off (inactive 7+ days)</div>
+      ${renderDropoff(dropoff)}
+      <div class="section-title">Feedback</div>
+      ${renderFeedback(feedback)}
+    `;
+    buildGrowthChart(growth);
+    buildEngagementChart(engagement);
+  }
+
+  function renderUserTable(users) {
+    if (!users.length) return '<div class="empty-state">No users yet.</div>';
+    const rows = users.map(u => {
+      const statusClass = u.status === 'At Risk' ? 'atrisk' : u.status;
+      return `<tr>
+        <td class="email-cell">${u.email}</td>
+        <td>${fmt(u.signup_date)}</td>
+        <td>${fmt(u.last_active)}</td>
+        <td>${u.total_briefings || 0}</td>
+        <td>${u.total_deep_dives || 0}</td>
+        <td><span class="status-badge status-${statusClass}">${u.status}</span></td>
+      </tr>`;
+    }).join('');
+    return `<table>
+      <thead><tr><th>Email</th><th>Signed Up</th><th>Last Active</th><th>Briefings</th><th>Deep Dives</th><th>Status</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  }
+
+  function renderDropoff(dropoff) {
+    if (!dropoff.length) return '<div class="empty-state" style="background:white;border:1px solid var(--border);border-radius:12px;">No drop-offs — everyone is active 🎉</div>';
+    const cards = dropoff.map(u => `
+      <div class="dropoff-card">
+        <div class="dropoff-email">${u.email}</div>
+        <div class="dropoff-meta">Signed up ${fmt(u.signup_date)} · Last seen ${fmt(u.last_active)}</div>
+      </div>`).join('');
+    return `<div class="dropoff-grid">${cards}</div>`;
+  }
+
+  function renderFeedback(feedback) {
+    if (!feedback.length) return '<div class="empty-state" style="background:white;border:1px solid var(--border);border-radius:12px;">No feedback yet.</div>';
+    const cards = feedback.map(f => `
+      <div class="feedback-card">
+        <div class="feedback-meta">
+          <span class="feedback-name">${f.name || 'Anonymous'}</span>
+          <span class="feedback-email">${f.email || ''}</span>
+          <span class="feedback-date">${fmt(f.created_at)}</span>
+        </div>
+        <div class="feedback-msg">${f.message}</div>
+      </div>`).join('');
+    return `<div class="feedback-list">${cards}</div>`;
+  }
+
+  function buildGrowthChart(data) {
+    const labels = data.map(d => new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
+    const values = data.map(d => parseInt(d.signups) || 0);
+    new Chart(document.getElementById('chart-growth'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{ label: 'Signups', data: values, borderColor: '#2a2a22', backgroundColor: 'rgba(42,42,34,0.06)', borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#2a2a22', fill: true, tension: 0.3 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { family: 'DM Sans', size: 11 }, color: '#888880', maxTicksLimit: 7 } },
+          y: { grid: { color: '#f0efe9' }, ticks: { font: { family: 'DM Sans', size: 11 }, color: '#888880', stepSize: 1 }, beginAtZero: true }
+        }
+      }
+    });
+  }
+
+  function buildEngagementChart(data) {
+    const labels = data.map(d => new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
+    new Chart(document.getElementById('chart-engagement'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Briefings', data: data.map(d => parseInt(d.briefings) || 0), backgroundColor: '#2a2a22', borderRadius: 4 },
+          { label: 'Deep Dives', data: data.map(d => parseInt(d.deep_dives) || 0), backgroundColor: '#8a9a8c', borderRadius: 4 },
+          { label: 'Audio Plays', data: data.map(d => (parseInt(d.briefing_plays)||0)+(parseInt(d.deep_dive_plays)||0)+(parseInt(d.deeper_dive_plays)||0)), backgroundColor: '#d4cfc4', borderRadius: 4 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: true, position: 'bottom', labels: { font: { family: 'DM Sans', size: 11 }, color: '#888880', boxWidth: 12, padding: 16 } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { family: 'DM Sans', size: 11 }, color: '#888880', maxTicksLimit: 7 } },
+          y: { grid: { color: '#f0efe9' }, ticks: { font: { family: 'DM Sans', size: 11 }, color: '#888880', stepSize: 1 }, beginAtZero: true }
+        }
+      }
+    });
+  }
+</script>
+</body>
+</html>

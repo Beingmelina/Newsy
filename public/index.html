@@ -1941,6 +1941,23 @@
       }
     })();
 
+    // Handle iOS PWA notification tap when app is already running in background
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        const params = new URLSearchParams(window.location.search);
+        const action = params.get('action');
+        if (action) {
+          window.history.replaceState({}, '', '/');
+          if (action === 'updates') {
+            setTimeout(() => showLiveAlert(), 300);
+          } else if (action === 'briefing') {
+            show('s9');
+            document.getElementById('btnGetBriefing').click();
+          }
+        }
+      }
+    });
+
     // Home button - always visible, takes you to home
     document.getElementById('btnHome').onclick = () => {
       const saved = localStorage.getItem(STORAGE_KEY);

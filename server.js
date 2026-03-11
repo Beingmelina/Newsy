@@ -468,20 +468,11 @@ async function rescheduleAllNotifications() {
 
 app.use(express.json());
 app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use((req, res, next) => {
-  res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-  res.set('Pragma', 'no-cache');
-  res.set('Expires', '0');
-  next();
-});
-
 // CSP that allows service workers and push notification subscriptions (worker-src, connect-src)
 app.use((req, res, next) => {
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "connect-src 'self' https: wss:",
@@ -491,6 +482,14 @@ app.use((req, res, next) => {
     "base-uri 'self'"
   ].join("; ");
   res.set("Content-Security-Policy", csp);
+  next();
+});
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
   next();
 });
 

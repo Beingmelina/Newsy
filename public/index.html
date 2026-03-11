@@ -1083,8 +1083,10 @@
       Object.keys(screens).forEach(k => screens[k].classList.add("hidden"));
       screens[id].classList.remove("hidden");
       if (id === 's11') updateLogoutButton();
-      const toast = document.getElementById('toastBanner');
-      if (toast) toast.remove();
+      if (id !== 'sEditLiveUpdates') {
+        const toast = document.getElementById('toastBanner');
+        if (toast) toast.remove();
+      }
 
       const fixedScreens = ['s1', 's1b'];
       const app = document.getElementById('app');
@@ -2886,8 +2888,18 @@
       state.liveUpdatesSubscribed = false;
       state.liveUpdatesDeclined = true;
       saveState();
+      const yesBtn = document.getElementById('btnEditLiveYes');
+      const noBtn = document.getElementById('btnEditLiveNo');
+      yesBtn.style.background = '#fff';
+      yesBtn.style.color = '#000';
+      yesBtn.style.border = '2px solid #000';
+      noBtn.style.background = '#000';
+      noBtn.style.color = '#fff';
       showToast('Your live alerts are now turned off');
-      show('s11');
+      setTimeout(() => {
+        const toast = document.getElementById('toastBanner');
+        if (toast) toast.remove();
+      }, 3000);
     }
 
     document.getElementById('btnEditLiveNo').onclick = () => disableLiveAlerts();

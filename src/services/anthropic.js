@@ -191,8 +191,8 @@ FORMATTING: Do NOT use asterisks (*) anywhere in the text. Write section headers
 Be concise, neutral, and balanced. For conflicts, present multiple perspectives with clear source attribution.
 
 DEEP DIVE TOPICS: After the briefing text, on a new line, output exactly this format:
-DEEP_DIVE_TOPICS: ["topic1", "topic2", "topic3", "topic4", "topic5"]
-Generate 3-5 specific deep dive topics (2-4 words each) drawn directly from the key stories covered in this briefing. These should be specific and strategic, not generic. Examples of good topics: "US-Iran Strikes", "Khamenei Succession Crisis", "Gulf Oil Disruption", "Cyprus Base Threat", "Tehran Nuclear Sites". Examples of bad generic topics: "Middle East conflict", "US politics", "World news".`;
+DEEP_DIVE_TOPICS: ["topic1", "topic2", "topic3", "topic4", "topic5", "topic6", "topic7"]
+Generate 3-10 specific deep dive topics (2-4 words each) drawn directly from the stories covered in this briefing. The number of topics per section must be proportional to how much of the briefing covered that section — if geopolitics dominated, most topics should be geopolitical; if business had significant coverage, include business topics too. Never ignore a section that had meaningful coverage. Topics must be specific and strategic, never generic. Examples of good topics: "Khamenei Succession Crisis" (politics), "Gulf Oil Disruption" (markets), "GLP-1 Drug Shortage" (health), "OpenAI GPT-5 Launch" (tech), "Cannes Film Controversy" (culture), "Champions League Final" (sports). Examples of bad generic topics: "Middle East conflict", "US politics", "World news".`;
 
   try {
     const client = getAnthropicClient();

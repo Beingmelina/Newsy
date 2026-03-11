@@ -808,7 +808,7 @@
       <p class="instruction" style="font-weight: bold; margin-top: 18px;">Would you like to receive live updates on the current escalations in the Middle East?</p>
 
       <div id="liveUpdatesEditStatus" style="margin-top: 14px;">
-        <p class="instruction" id="liveUpdatesStatusText" style="color: #333;">&#10003; Live updates are currently active.</p>
+        <p class="instruction" id="liveUpdatesStatusText" style="color: #333;">Live updates are currently ON.</p>
       </div>
 
       <button class="btn btnPrimary btnFull" id="btnDisableLiveUpdates" style="margin-top: 18px;">Disable Live Updates</button>
@@ -2836,10 +2836,10 @@
       const statusText = document.getElementById('liveUpdatesStatusText');
       const toggleBtn = document.getElementById('btnDisableLiveUpdates');
       if (state.liveUpdatesSubscribed) {
-        statusText.textContent = '&#10003; Live updates are currently active.';
+        statusText.textContent = 'Live updates are currently ON.';
         toggleBtn.textContent = 'Disable Live Updates';
       } else {
-        statusText.textContent = '&#10007; Live updates are currently inactive.';
+        statusText.textContent = 'Live updates are currently OFF.';
         toggleBtn.textContent = 'Enable Live Updates';
       }
     }

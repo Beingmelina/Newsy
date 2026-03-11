@@ -807,16 +807,11 @@
 
       <p class="instruction" style="font-weight: bold; margin-top: 18px;">Would you like to receive live updates on the current escalations in the Middle East?</p>
 
-      <div id="liveUpdatesEditStatus" class="hidden" style="margin-top: 14px;">
-        <p class="instruction" style="color: #333;">Live updates are currently active.</p>
+      <div id="liveUpdatesEditStatus" style="margin-top: 14px;">
+        <p class="instruction" id="liveUpdatesStatusText" style="color: #333;">&#10003; Live updates are currently active.</p>
       </div>
 
-      <div class="row" id="liveUpdatesEditBtns" style="margin-top: 18px;">
-        <button class="btn btnPrimary" id="btnEditLiveYes">Yes</button>
-        <button class="btn btnAlt" id="btnEditLiveNo">No</button>
-      </div>
-
-      <button class="btn btnPrimary btnFull hidden" id="btnDisableLiveUpdates" style="margin-top: 18px;">Disable Live Updates</button>
+      <button class="btn btnPrimary btnFull" id="btnDisableLiveUpdates" style="margin-top: 18px;">Disable Live Updates</button>
       <button class="btn btnAlt btnFull" id="btnEditLiveBack" style="margin-top: 18px;">Back</button>
     </section>
 
@@ -2837,42 +2832,21 @@
     };
 
     // Edit Live Updates
-    document.getElementById('btnEditLiveUpdates').onclick = () => {
-      const statusEl = document.getElementById('liveUpdatesEditStatus');
-      const btnsEl = document.getElementById('liveUpdatesEditBtns');
-      const disableBtn = document.getElementById('btnDisableLiveUpdates');
+    function updateLiveUpdatesScreen() {
+      const statusText = document.getElementById('liveUpdatesStatusText');
+      const toggleBtn = document.getElementById('btnDisableLiveUpdates');
       if (state.liveUpdatesSubscribed) {
-        statusEl.classList.remove('hidden');
-        btnsEl.style.display = 'none';
-        disableBtn.classList.remove('hidden');
+        statusText.textContent = '&#10003; Live updates are currently active.';
+        toggleBtn.textContent = 'Disable Live Updates';
       } else {
-        statusEl.classList.add('hidden');
-        btnsEl.style.display = '';
-        disableBtn.classList.add('hidden');
+        statusText.textContent = '&#10007; Live updates are currently inactive.';
+        toggleBtn.textContent = 'Enable Live Updates';
       }
+    }
+
+    document.getElementById('btnEditLiveUpdates').onclick = () => {
+      updateLiveUpdatesScreen();
       show('sEditLiveUpdates');
-    };
-
-    document.getElementById('btnEditLiveYes').onclick = async () => {
-      if (!('Notification' in window) || !('PushManager' in window)) {
-        showA2HS();
-        return;
-      }
-
-      let perm = Notification.permission;
-      if (perm !== 'granted') {
-        show('sLiveEnable');
-        return;
-      }
-
-      await setupNotifications();
-      await subscribeLiveUpdates();
-      state.liveUpdatesSubscribed = true;
-      state.liveUpdatesDeclined = false;
-      saveState();
-      document.getElementById('liveUpdatesEditStatus').classList.remove('hidden');
-      document.getElementById('liveUpdatesEditBtns').style.display = 'none';
-      document.getElementById('btnDisableLiveUpdates').classList.remove('hidden');
     };
 
     async function disableLiveAlerts() {
@@ -2888,23 +2862,34 @@
       state.liveUpdatesSubscribed = false;
       state.liveUpdatesDeclined = true;
       saveState();
-      const yesBtn = document.getElementById('btnEditLiveYes');
-      const noBtn = document.getElementById('btnEditLiveNo');
-      yesBtn.style.background = '#fff';
-      yesBtn.style.color = '#000';
-      yesBtn.style.border = '2px solid #000';
-      noBtn.style.background = '#000';
-      noBtn.style.color = '#fff';
-      showToast('Your live alerts are now turned off');
-      setTimeout(() => {
-        const toast = document.getElementById('toastBanner');
-        if (toast) toast.remove();
-      }, 3000);
+      updateLiveUpdatesScreen();
     }
 
-    document.getElementById('btnEditLiveNo').onclick = () => disableLiveAlerts();
+    async function enableLiveAlerts() {
+      if (!('Notification' in window) || !('PushManager' in window)) {
+        showA2HS();
+        return;
+      }
+      let perm = Notification.permission;
+      if (perm !== 'granted') {
+        show('sLiveEnable');
+        return;
+      }
+      await setupNotifications();
+      await subscribeLiveUpdates();
+      state.liveUpdatesSubscribed = true;
+      state.liveUpdatesDeclined = false;
+      saveState();
+      updateLiveUpdatesScreen();
+    }
 
-    document.getElementById('btnDisableLiveUpdates').onclick = () => disableLiveAlerts();
+    document.getElementById('btnDisableLiveUpdates').onclick = () => {
+      if (state.liveUpdatesSubscribed) {
+        disableLiveAlerts();
+      } else {
+        enableLiveAlerts();
+      }
+    };
 
     document.getElementById('btnEditLiveBack').onclick = () => {
       show('s11');

@@ -1258,9 +1258,10 @@
         otherPublication: state.otherPublication,
         userId: state.uuid,
         voice,
-        briefingLength: state.briefingLength
+        briefingLength: state.briefingLength,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
       };
-
+ 
       const briefingTextEl = document.getElementById('briefingText');
       
       return new Promise((resolve, reject) => {

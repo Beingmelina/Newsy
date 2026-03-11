@@ -48,14 +48,15 @@ async function* generateBriefingStream(articles, preferences, previousBriefing) 
     `[${i + 1}] [TOPIC: ${a.topic}] ${a.source}: "${a.title}" - ${a.description}`
   ).join('\n\n');
   
-  const currentHour = new Date().getHours();
-  const greeting = currentHour < 12 ? 'Good morning' : currentHour < 17 ? 'Good afternoon' : 'Good evening';
+  const userTimezone = preferences.timezone || 'Asia/Dubai';
   const now = new Date();
+  const currentHour = parseInt(new Intl.DateTimeFormat('en-US', { hour: 'numeric', hour12: false, timeZone: userTimezone }).format(now));
+  const greeting = currentHour >= 3 && currentHour < 12 ? 'Good morning' : currentHour >= 12 && currentHour < 18 ? 'Good afternoon' : 'Good evening';
   const today = new Intl.DateTimeFormat('en-US', { 
     weekday: 'long', 
     month: 'long', 
     day: 'numeric',
-    timeZone: 'UTC'
+    timeZone: userTimezone
   }).format(now);
   
   const selectedTopics = selectedTopicsList.join(', ') || 'General news';
@@ -289,14 +290,15 @@ async function generateBriefing(articles, preferences) {
     `[${i + 1}] [TOPIC: ${a.topic}] ${a.source}: "${a.title}" - ${a.description}`
   ).join('\n\n');
   
-  const currentHour = new Date().getHours();
-  const greeting = currentHour < 12 ? 'Good morning' : currentHour < 17 ? 'Good afternoon' : 'Good evening';
+  const userTimezone = preferences.timezone || 'Asia/Dubai';
   const now = new Date();
+  const currentHour = parseInt(new Intl.DateTimeFormat('en-US', { hour: 'numeric', hour12: false, timeZone: userTimezone }).format(now));
+  const greeting = currentHour >= 3 && currentHour < 12 ? 'Good morning' : currentHour >= 12 && currentHour < 18 ? 'Good afternoon' : 'Good evening';
   const today = new Intl.DateTimeFormat('en-US', { 
     weekday: 'long', 
     month: 'long', 
     day: 'numeric',
-    timeZone: 'UTC'
+    timeZone: userTimezone
   }).format(now);
   
   // Determine which sections to include based on selected topics

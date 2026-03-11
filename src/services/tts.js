@@ -8,6 +8,7 @@ function cleanTextForTTS(text) {
     .replace(/_{1,2}(.+?)_{1,2}/g, '$1')
     .replace(/\[(.+?)\]\(.+?\)/g, '$1')
     .replace(/`(.+?)`/g, '$1')
+    .replace(/ - /g, ', ')
     .replace(/[-\u2013\u2014]{3,}/g, '')
     .replace(/\n{3,}/g, '\n\n')
     .replace(/^[A-Z][A-Z\s\/&]{4,}$/gm, '')

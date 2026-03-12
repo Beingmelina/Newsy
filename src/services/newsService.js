@@ -45,7 +45,6 @@ const RSS_FEEDS = {
     { name: 'The Hindu', url: 'https://www.thehindu.com/feeder/default.rss', region: 'South Asia' },
     { name: 'Dawn (Pakistan)', url: 'https://www.dawn.com/feeds/home', region: 'South Asia' },
     { name: 'NDTV', url: 'https://feeds.feedburner.com/ndtvnews-top-stories', region: 'South Asia' },
-    { name: 'Hindustan Times', url: 'https://www.hindustantimes.com/rss', region: 'South Asia' },
     { name: 'Channel News Asia', url: 'https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml', region: 'Southeast Asia' },
     { name: 'Rappler', url: 'https://www.rappler.com/feed/', region: 'Southeast Asia' },
     { name: 'Malaysiakini', url: 'https://www.malaysiakini.com/rss/en/news.rss', region: 'Southeast Asia' },
@@ -136,7 +135,6 @@ const REGION_FEEDS = {
     { name: 'The Hindu', url: 'https://www.thehindu.com/feeder/default.rss' },
     { name: 'Dawn (Pakistan)', url: 'https://www.dawn.com/feeds/home' },
     { name: 'NDTV', url: 'https://feeds.feedburner.com/ndtvnews-top-stories' },
-    { name: 'Hindustan Times', url: 'https://www.hindustantimes.com/rss' },
   ],
   'Southeast Asia': [
     { name: 'Channel News Asia', url: 'https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml' },

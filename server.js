@@ -676,6 +676,20 @@ app.post('/api/briefing-stream', async (req, res) => {
     
     clearInterval(keepAlive);
     res.end();
+    setImmediate(async () => {
+      try {
+        if (userId) {
+          await pool.query(
+            `INSERT INTO analytics_events (user_id, event_type, metadata, created_at) VALUES ($1, $2, $3, NOW())`,
+            [userId, 'briefing_generated', JSON.stringify({ topics })]
+          );
+          await pool.query(
+            `UPDATE user_preferences SET last_active_at = NOW() WHERE user_id = $1`,
+            [userId]
+          );
+        }
+      } catch (e) { /* silent */ }
+    });
   } catch (error) {
     clearInterval(keepAlive);
     console.error('Streaming briefing error:', error);

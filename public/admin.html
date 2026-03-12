@@ -218,12 +218,14 @@
         <td>${fmt(u.signup_date)}</td>
         <td>${fmt(u.last_active)}</td>
         <td>${u.total_briefings || 0}</td>
+        <td>${u.total_briefing_plays || 0}</td>
         <td>${u.total_deep_dives || 0}</td>
+        <td>${u.total_deep_dive_plays || 0}</td>
         <td><span class="status-badge status-${statusClass}">${u.status}</span></td>
       </tr>`;
     }).join('');
     return `<table>
-      <thead><tr><th>Email</th><th>Signed Up</th><th>Last Active</th><th>Briefings</th><th>Deep Dives</th><th>Status</th></tr></thead>
+      <thead><tr><th>Email</th><th>Signed Up</th><th>Last Active</th><th>Briefings</th><th>Briefing Plays</th><th>Deep Dives</th><th>Deep Dive Plays</th><th>Status</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
   }

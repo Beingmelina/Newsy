@@ -1395,7 +1395,9 @@ app.get('/admin/api/users', requireAdmin, async (req, res) => {
         MIN(up.created_at) as signup_date,
         MAX(up.last_active_at) as last_active,
         COUNT(DISTINCT ae.id) FILTER (WHERE ae.event_type = 'briefing_generated') as total_briefings,
+        COUNT(DISTINCT ae.id) FILTER (WHERE ae.event_type = 'briefing_audio_played') as total_briefing_plays,
         COUNT(DISTINCT ae.id) FILTER (WHERE ae.event_type = 'deep_dive_generated') as total_deep_dives,
+        COUNT(DISTINCT ae.id) FILTER (WHERE ae.event_type = 'deep_dive_audio_played') as total_deep_dive_plays,
         CASE
           WHEN MAX(up.last_active_at) >= NOW() - INTERVAL '7 days' THEN 'Active'
           WHEN MAX(up.last_active_at) >= NOW() - INTERVAL '30 days' THEN 'At Risk'

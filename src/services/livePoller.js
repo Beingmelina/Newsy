@@ -4,11 +4,12 @@ const Anthropic = require('@anthropic-ai/sdk');
 const parser = new Parser();
 const seenArticles = new Set();
 const sentAlertEvents = new Map();
-const SENT_ALERT_TTL = 24 * 60 * 60 * 1000;
+const SENT_ALERT_TTL = 6 * 60 * 60 * 1000;
 let isRunning = false;
 let pollInterval = null;
 
 const POLL_INTERVAL_MS = 2 * 60 * 1000;
+const NOISE_WORDS = new Set(['israel','israeli','iran','iranian','gaza','hamas','hezbollah','attack','attacks','strike','strikes','struck','killed','kills','killing','military','forces','war','conflict','troops','missile','missiles','rocket','airstrike','airstrikes','report','reports','reported','say','says','said','officials','government','new','latest','breaking','update','the','and','for','that','with','from','into','over','after','amid','as','in','on','at','by','of','to','a','an']);
 const MAX_SEEN_SIZE = 5000;
 
 const LIVE_FEEDS = [
@@ -179,18 +180,45 @@ function generateArticleId(article) {
   return `${article.source}:${article.url || article.title}`;
 }
 
-function isDuplicateEvent(newTitle) {
+function stripNoise(title) {
+  return title.toLowerCase().split(/\s+/).filter(w => w.length > 3 && !NOISE_WORDS.has(w));
+}
+
+async function isDuplicateEvent(newTitle) {
   const now = Date.now();
+  const newWords = stripNoise(newTitle);
+
   for (const [sentTitle, sentTime] of sentAlertEvents.entries()) {
     if (now - sentTime > SENT_ALERT_TTL) {
       sentAlertEvents.delete(sentTitle);
       continue;
     }
-    const newWords = newTitle.toLowerCase().split(/\s+/).filter(w => w.length > 4);
-    const sentWords = sentTitle.toLowerCase().split(/\s+/).filter(w => w.length > 4);
+
+    const sentWords = stripNoise(sentTitle);
     const overlap = newWords.filter(w => sentWords.includes(w)).length;
-    const similarity = overlap / Math.max(newWords.length, sentWords.length);
-    if (similarity >= 0.7) return true;
+    const similarity = overlap / Math.max(newWords.length, sentWords.length, 1);
+
+    if (similarity >= 0.8) return true;
+    if (similarity < 0.5) continue;
+
+    try {
+      const client = new Anthropic({
+        apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY,
+        baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+      });
+      const msg = await client.messages.create({
+        model: 'claude-haiku-4-5',
+        max_tokens: 50,
+        messages: [{
+          role: 'user',
+          content: `Are these two news headlines reporting the same event with no significant new information, or is the second one a meaningful new development?\n\nHeadline 1: ${sentTitle}\nHeadline 2: ${newTitle}\n\nReply with only one word: DUPLICATE or DEVELOPMENT`
+        }]
+      });
+      const verdict = msg.content[0].text.trim().toUpperCase();
+      if (verdict === 'DUPLICATE') return true;
+    } catch (err) {
+      if (similarity >= 0.65) return true;
+    }
   }
   return false;
 }
@@ -245,7 +273,7 @@ async function pollForBreakingNews(sendNotificationCallback) {
 if (status === 'UNCONFIRMED') body = `Via ${article.source}`;
       
       console.log(`  - [${status}] ${article.source}: ${article.title}`);
-      if (isDuplicateEvent(article.title)) {
+      if (await isDuplicateEvent(article.title)) {
         console.log(`  - [SKIPPED - duplicate event] ${article.source}: ${article.title}`);
         continue;
       }

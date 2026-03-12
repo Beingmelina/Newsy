@@ -2623,8 +2623,8 @@
 
       try {
         isPlaying = true;
-        fetch('/api/track-event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: state.uuid, eventType: 'briefing_audio_played' }) }).catch(() => {});
         await playAudio(state.lastBriefingText, onAudioStarted);
+        fetch('/api/track-event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: state.uuid, eventType: 'briefing_audio_played' }) }).catch(() => {});
       } catch(e) {
         clearInterval(audioLoadInterval);
         console.error('Audio playback error:', e);
@@ -2697,9 +2697,9 @@
 
       try {
         isDivePlaying = true;
-        fetch('/api/track-event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: state.uuid, eventType: 'deep_dive_audio_played' }) }).catch(() => {});
         const text = document.getElementById('deepDiveText').textContent;
         await playAudio(text, onAudioStarted);
+        fetch('/api/track-event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: state.uuid, eventType: 'deep_dive_audio_played' }) }).catch(() => {});
       } catch(e) {
         clearInterval(diveAudioLoadInterval);
         console.error('Deep dive audio error:', e);
@@ -2774,9 +2774,9 @@
       };
       try {
         isDivePlaying = true;
-        fetch('/api/track-event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: state.uuid, eventType: 'deeper_dive_audio_played' }) }).catch(() => {});
         const text = document.getElementById('deeperDiveText').textContent;
         await playAudio(text, onAudioStarted);
+        fetch('/api/track-event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: state.uuid, eventType: 'deeper_dive_audio_played' }) }).catch(() => {});
       } catch(e) {
         clearInterval(loadInterval);
         console.error('Deeper dive audio error:', e);

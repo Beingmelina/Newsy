@@ -478,6 +478,7 @@ app.use((req, res, next) => {
     "connect-src 'self' https: wss:",
     "worker-src 'self' blob:",
     "img-src 'self' data: https:",
+    "media-src 'self' blob:",
     "frame-ancestors 'self'",
     "base-uri 'self'"
   ].join("; ");

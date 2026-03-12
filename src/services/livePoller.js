@@ -14,7 +14,7 @@ const MAX_SEEN_SIZE = 5000;
 const LIVE_FEEDS = [
   { name: 'BBC Middle East', url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', lang: 'en', type: 'wire' },
   { name: 'Al Jazeera', url: 'https://www.aljazeera.com/xml/rss/all.xml', lang: 'en', type: 'wire' },
-  { name: 'Jerusalem Post', url: 'https://www.jpost.com/rss/rssfeedsfrontpage.aspx', lang: 'en', type: 'regional' },
+  { name: 'Jerusalem Post', url: 'https://www.jpost.com/rss/rssfeedsfrontpage.aspx', lang: 'en', type: 'regional', noAlerts: true },
   { name: 'Iran International', url: 'https://www.iranintl.com/en/feed', lang: 'en', type: 'regional' },
   { name: 'IRNA (Iran State)', url: 'https://en.irna.ir/rss', lang: 'en', type: 'state' },
   { name: 'Tasnim News', url: 'https://www.tasnimnews.com/en/rss', lang: 'en', type: 'state' },
@@ -25,7 +25,7 @@ const LIVE_FEEDS = [
   { name: 'Guardian Middle East', url: 'https://www.theguardian.com/world/middleeast/rss', lang: 'en', type: 'wire' },
   { name: 'NYT Middle East', url: 'https://rss.nytimes.com/services/xml/rss/nyt/MiddleEast.xml', lang: 'en', type: 'wire' },
   { name: 'BBC World', url: 'https://feeds.bbci.co.uk/news/world/rss.xml', lang: 'en', type: 'wire' },
-  { name: 'Ynet (Hebrew)', url: 'https://www.ynet.co.il/Integration/StoryRss2.xml', lang: 'he', type: 'regional' },
+  { name: 'Ynet (Hebrew)', url: 'https://www.ynet.co.il/Integration/StoryRss2.xml', lang: 'he', type: 'regional', noAlerts: true },
   { name: 'International Crisis Group', url: 'https://www.crisisgroup.org/rss.xml', lang: 'en', type: 'wire' },
   { name: 'Iraqi News', url: 'https://www.iraqinews.com/feed/', lang: 'en', type: 'regional' },
 ];
@@ -47,7 +47,8 @@ async function fetchFeedArticles(feed) {
       sourceType: feed.type,
       url: item.link || '',
       publishedAt: item.pubDate || item.isoDate || new Date().toISOString(),
-      lang: feed.lang
+      lang: feed.lang,
+      noAlerts: feed.noAlerts || false
     }));
   } catch (err) {
     return [];
@@ -226,7 +227,10 @@ async function pollForBreakingNews(sendNotificationCallback) {
     article.title = await translateTitle(article.title, article.lang);
   }
 
-  const { tierA, tierB } = await assessBreakingNews(newArticles);
+  const alertEligible = newArticles.filter(a => !a.noAlerts);
+  const briefingOnly = newArticles.filter(a => a.noAlerts);
+  const { tierA, tierB } = await assessBreakingNews(alertEligible);
+  const allTierB = [...tierB, ...briefingOnly];
 
   if (tierA.length > 0) {
     console.log(`[LivePoller] ${tierA.length} TIER A alerts detected:`);
@@ -259,9 +263,9 @@ if (status === 'UNCONFIRMED') body = `Via ${article.source}`;
     }
   }
 
-  if (tierB.length > 0) {
-    console.log(`[LivePoller] ${tierB.length} Tier B stories (for next briefing):`);
-    for (const article of tierB) {
+  if (allTierB.length > 0) {
+    console.log(`[LivePoller] ${allTierB.length} Tier B stories (for next briefing):`);
+    for (const article of allTierB) {
       console.log(`  - ${article.source}: ${article.title}`);
     }
   }

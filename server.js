@@ -1418,8 +1418,7 @@ app.get('/admin/api/users', requireAdmin, async (req, res) => {
           ELSE 'Ghost'
         END as status
       FROM user_preferences up
-      LEFT JOIN users u ON LOWER(up.email) = LOWER(u.email)
-      LEFT JOIN analytics_events ae ON ae.user_id = u.id
+      LEFT JOIN analytics_events ae ON ae.user_id = up.user_id
       WHERE up.email != ''
       GROUP BY LOWER(up.email)
       ORDER BY last_active DESC NULLS LAST

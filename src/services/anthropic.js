@@ -167,11 +167,11 @@ TIER 1 — Neutral and factual, can lead any story and open any paragraph: Al Ja
 
 TIER 2 — Credible but carry known editorial perspectives. Always corroborate on Middle East stories, never use as sole lead: BBC, The Guardian, NYT, WSJ, CNBC, Bloomberg, Financial Times.
 
-TIER 3 — Regional or state perspective. Always frame explicitly when citing: RT ("Russian state media reports..."), Fars News ("Iranian state media reports...").
+TIER 3 — Regional or state perspective. Always frame explicitly when citing: RT ("Russian state media reports..."), PressTV ("Iranian state media reports...").
 
 TIER 4 — Israeli perspective only. NEVER use in opening paragraphs, always attribute clearly: Jerusalem Post, Ynet, Walla News.
 
-ONLY cite sources from this approved list — never cite any other publication or outlet: Al Jazeera, France 24, NPR, Middle East Monitor, The National, Syria Direct, Iraqi News, International Crisis Group, BBC, The Guardian, NYT, WSJ, CNBC, Bloomberg, Financial Times, RT, Fars News, Iran International, Jerusalem Post, Ynet, Walla News, Deutsche Welle, Politico Europe, CBC Canada, The Hindu, Dawn, NDTV, Hindustan Times, Channel News Asia, Rappler, Malaysiakini, TechCrunch, Wired, Ars Technica, The Verge, MIT Technology Review, VentureBeat, Rest of World, STAT News, The Atlantic, The Economist, Pitchfork, Sky Sports, ESPN, Variety, Hollywood Reporter, Deadline.
+ONLY cite sources from this approved list — never cite any other publication or outlet: Al Jazeera, France 24, NPR, Middle East Monitor, The National, Syria Direct, Iraqi News, International Crisis Group, BBC, The Guardian, NYT, WSJ, CNBC, Bloomberg, Financial Times, RT, PressTV, Iran International, Jerusalem Post, Ynet, Walla News, Deutsche Welle, Politico Europe, CBC Canada, The Hindu, Dawn, NDTV, Channel News Asia, Rappler, Malaysiakini, TechCrunch, Wired, Ars Technica, The Verge, MIT Technology Review, VentureBeat, Rest of World, STAT News, The Atlantic, The Economist, Pitchfork, Sky Sports, ESPN, Variety, Hollywood Reporter, Deadline, Bollywood Hungama, Gulf News Entertainment, Khaleej Times Entertainment.
 
 Examples: "According to Al Jazeera...", "The National reports...", "Russian state media reports...", "Iranian state media says...", "Israeli media reports...". If an article references another outlet not on the list, paraphrase the information without naming that outlet.
 
@@ -410,11 +410,11 @@ TIER 1 — Neutral and factual, can lead any story and open any paragraph: Al Ja
 
 TIER 2 — Credible but carry known editorial perspectives. Always corroborate on Middle East stories, never use as sole lead: BBC, The Guardian, NYT, WSJ, CNBC, Bloomberg, Financial Times.
 
-TIER 3 — Regional or state perspective. Always frame explicitly when citing: RT ("Russian state media reports..."), Fars News ("Iranian state media reports...").
+TIER 3 — Regional or state perspective. Always frame explicitly when citing: RT ("Russian state media reports..."), PressTV ("Iranian state media reports...").
 
 TIER 4 — Israeli perspective only. NEVER use in opening paragraphs, always attribute clearly: Jerusalem Post, Ynet, Walla News.
 
-ONLY cite sources from this approved list — never cite any other publication or outlet: Al Jazeera, France 24, NPR, Middle East Monitor, The National, Syria Direct, Iraqi News, International Crisis Group, BBC, The Guardian, NYT, WSJ, CNBC, Bloomberg, Financial Times, RT, Fars News, Iran International, Jerusalem Post, Ynet, Walla News, Deutsche Welle, Politico Europe, CBC Canada, The Hindu, Dawn, NDTV, Hindustan Times, Channel News Asia, Rappler, Malaysiakini, TechCrunch, Wired, Ars Technica, The Verge, MIT Technology Review, VentureBeat, Rest of World, STAT News, The Atlantic, The Economist, Pitchfork, Sky Sports, ESPN, Variety, Hollywood Reporter, Deadline.
+ONLY cite sources from this approved list — never cite any other publication or outlet: Al Jazeera, France 24, NPR, Middle East Monitor, The National, Syria Direct, Iraqi News, International Crisis Group, BBC, The Guardian, NYT, WSJ, CNBC, Bloomberg, Financial Times, RT, PressTV, Iran International, Jerusalem Post, Ynet, Walla News, Deutsche Welle, Politico Europe, CBC Canada, The Hindu, Dawn, NDTV, Channel News Asia, Rappler, Malaysiakini, TechCrunch, Wired, Ars Technica, The Verge, MIT Technology Review, VentureBeat, Rest of World, STAT News, The Atlantic, The Economist, Pitchfork, Sky Sports, ESPN, Variety, Hollywood Reporter, Deadline, Bollywood Hungama, Gulf News Entertainment, Khaleej Times Entertainment.
 
 Examples: "According to Al Jazeera...", "The National reports...", "Russian state media reports...", "Iranian state media says...", "Israeli media reports...". If an article references another outlet not on the list, paraphrase the information without naming that outlet.
 

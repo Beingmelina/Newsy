@@ -30,7 +30,7 @@ const RSS_FEEDS = {
     { name: 'Middle East Monitor', url: 'https://www.middleeastmonitor.com/feed/', region: 'Middle East' },
     { name: 'Jerusalem Post', url: 'https://www.jpost.com/rss/rssfeedsfrontpage.aspx', region: 'Middle East' },
     { name: 'Iran International', url: 'https://www.iranintl.com/en/feed', region: 'Middle East' },
-    { name: 'Fars News', url: 'https://www.farsnews.ir/rss', region: 'Middle East' },
+    { name: 'PressTV', url: 'https://www.presstv.ir/rss', region: 'Middle East' },
     { name: 'NYT Middle East', url: 'https://rss.nytimes.com/services/xml/rss/nyt/MiddleEast.xml', region: 'Middle East' },
     { name: 'Guardian Middle East', url: 'https://www.theguardian.com/world/middleeast/rss', region: 'Middle East' },
 
@@ -95,6 +95,9 @@ const RSS_FEEDS = {
     { name: 'Variety', url: 'https://variety.com/feed/', region: 'Global' },
     { name: 'Hollywood Reporter', url: 'https://www.hollywoodreporter.com/feed/', region: 'Global' },
     { name: 'Deadline', url: 'https://deadline.com/feed/', region: 'Global' },
+    { name: 'Bollywood Hungama', url: 'https://www.bollywoodhungama.com/rss/news.xml', region: 'South Asia' },
+    { name: 'Gulf News Entertainment', url: 'https://gulfnews.com/entertainment?service=rss', region: 'Middle East' },
+    { name: 'Khaleej Times Entertainment', url: 'https://www.khaleejtimes.com/rss/entertainment', region: 'Middle East' },
   ]
 };
 
@@ -106,7 +109,7 @@ const REGION_FEEDS = {
     { name: 'Middle East Monitor', url: 'https://www.middleeastmonitor.com/feed/' },
     { name: 'Jerusalem Post', url: 'https://www.jpost.com/rss/rssfeedsfrontpage.aspx' },
     { name: 'Iran International', url: 'https://www.iranintl.com/en/feed' },
-    { name: 'Fars News', url: 'https://farsnews.ir/rss' },
+    { name: 'PressTV', url: 'https://www.presstv.ir/rss' },
     { name: 'Guardian Middle East', url: 'https://www.theguardian.com/world/middleeast/rss' },
     { name: 'NYT Middle East', url: 'https://rss.nytimes.com/services/xml/rss/nyt/MiddleEast.xml' },
     { name: 'France 24 Arabic', url: 'https://www.france24.com/ar/rss', lang: 'ar' },

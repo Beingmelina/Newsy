@@ -884,6 +884,7 @@
   </div>
 
   </div>
+  <p id="siteDisclaimer" style="display:none; font-size:11px; color:#666; text-align:center; padding:6px 28px 0; line-height:1.6; width:min(900px, calc(100% - 24px)); margin: 0 auto;">Newsy does not produce original journalism. All briefings are aggregated from independent news organisations. Any views expressed are those of the original sources.</p>
 
   <script>
     const OUTLETS = [
@@ -1102,6 +1103,8 @@
       } else {
         app.classList.remove('noScroll');
       }
+      const disclaimer = document.getElementById('siteDisclaimer');
+      if (disclaimer) disclaimer.style.display = ['s9','s10','s10b'].includes(id) ? 'block' : 'none';
       window.scrollTo(0, 0);
       app.scrollTop = 0;
       document.body.scrollTop = 0;

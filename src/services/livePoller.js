@@ -15,20 +15,19 @@ const MAX_SEEN_SIZE = 5000;
 const LIVE_FEEDS = [
   { name: 'BBC Middle East', url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', lang: 'en', type: 'wire' },
   { name: 'Al Jazeera', url: 'https://www.aljazeera.com/xml/rss/all.xml', lang: 'en', type: 'wire' },
-  { name: 'Jerusalem Post', url: 'https://www.jpost.com/rss/rssfeedsfrontpage.aspx', lang: 'en', type: 'regional', noAlerts: true },
-  { name: 'Iran International', url: 'https://www.iranintl.com/en/feed', lang: 'en', type: 'regional' },
-  { name: 'IRNA (Iran State)', url: 'https://en.irna.ir/rss', lang: 'en', type: 'state' },
-  { name: 'Tasnim News', url: 'https://www.tasnimnews.com/en/rss', lang: 'en', type: 'state' },
-  { name: 'Fars News', url: 'https://www.farsnews.ir/rss', lang: 'en', type: 'state' },
-  { name: 'PressTV', url: 'https://www.presstv.ir/rss', lang: 'en', type: 'state' },
-  { name: 'Middle East Monitor', url: 'https://www.middleeastmonitor.com/feed/', lang: 'en', type: 'regional' },
-  { name: 'The National (UAE)', url: 'https://www.thenationalnews.com/arc/outboundfeeds/rss/?outputType=xml', lang: 'en', type: 'state' },
+  { name: 'The National (UAE)', url: 'https://www.thenationalnews.com/arc/outboundfeeds/rss/?outputType=xml', lang: 'en', type: 'wire' },
+  { name: 'Sky News Arabia', url: 'https://www.skynewsarabia.com/rss.xml', lang: 'ar', type: 'wire' },
+  { name: 'France 24 Arabic', url: 'https://www.france24.com/ar/%D8%A7%D9%84%D8%B4%D8%B1%D9%82-%D8%A7%D9%84%D8%A3%D9%88%D8%B3%D8%B7/rss', lang: 'ar', type: 'wire' },
   { name: 'Guardian Middle East', url: 'https://www.theguardian.com/world/middleeast/rss', lang: 'en', type: 'wire' },
   { name: 'NYT Middle East', url: 'https://rss.nytimes.com/services/xml/rss/nyt/MiddleEast.xml', lang: 'en', type: 'wire' },
   { name: 'BBC World', url: 'https://feeds.bbci.co.uk/news/world/rss.xml', lang: 'en', type: 'wire' },
-  { name: 'Ynet (Hebrew)', url: 'https://www.ynet.co.il/Integration/StoryRss2.xml', lang: 'he', type: 'regional', noAlerts: true },
-  { name: 'International Crisis Group', url: 'https://www.crisisgroup.org/rss.xml', lang: 'en', type: 'wire' },
+  { name: 'Middle East Monitor', url: 'https://www.middleeastmonitor.com/feed/', lang: 'en', type: 'regional' },
+  { name: 'Iran International', url: 'https://www.iranintl.com/en/feed', lang: 'en', type: 'regional' },
   { name: 'Iraqi News', url: 'https://www.iraqinews.com/feed/', lang: 'en', type: 'regional' },
+  { name: 'International Crisis Group', url: 'https://www.crisisgroup.org/rss.xml', lang: 'en', type: 'wire' },
+  { name: 'LBCI Middle East', url: 'https://www.lbcgroup.tv/Rss/News/en/126/middle-east-news', lang: 'en', type: 'regional' },
+  { name: 'LBCI Lebanon', url: 'https://www.lbcgroup.tv/Rss/News/en/8/lebanon-news', lang: 'en', type: 'regional' },
+  { name: 'Mehr News Agency', url: 'https://en.mehrnews.com/rss', lang: 'en', type: 'state' },
 ];
 
 function timeoutPromise(ms) {
@@ -73,12 +72,19 @@ async function translateTitle(title, lang) {
   }
 }
 
-async function assessBreakingNews(articles) {
+async function assessBreakingNews(
+  articles,
+  recentAlertTitles = []
+) {
   if (articles.length === 0) return { tierA: [], tierB: [] };
 
   const headlines = articles.map((a, i) => 
     `[${i}] [${a.sourceType?.toUpperCase() || 'REGIONAL'}] ${a.source}: ${a.title}`
   ).join('\n');
+
+  const recentContext = recentAlertTitles.length > 0
+    ? `\n\nRecently sent alerts (do not duplicate as Tier A unless there is significant new development):\n${recentAlertTitles.slice(0, 30).map(t => `- ${t}`).join('\n')}`
+    : '';
 
   try {
     const client = new Anthropic({
@@ -92,11 +98,12 @@ async function assessBreakingNews(articles) {
       messages: [{
         role: 'user',
         content: `You are a breaking news editor for a Middle East-focused news service for business professionals. Classify these headlines into two tiers.
+${recentContext}
 
 SOURCE TYPES (shown in brackets):
-- WIRE = global wire services (BBC, Guardian, NYT, Al Jazeera, ICG) — high credibility
-- STATE = official state media (The National/UAE, WAM) — official but may have bias
-- REGIONAL = regional outlets (Jerusalem Post, Iran International, Ynet, Iraqi News, Middle East Monitor) — may have partisan framing
+- WIRE = global wire services (BBC, Guardian, NYT, Al Jazeera, The National UAE, Sky News Arabia, France 24, ICG) — high credibility
+- STATE = Iranian state media (Mehr News Agency) — pro-regime bias, always frame explicitly
+- REGIONAL = regional outlets (Iran International, Iraqi News, Middle East Monitor, LBCI) — may have partisan framing
 
 TIER A — IMMEDIATE PUSH ALERT:
 Events that would make a news channel interrupt programming:
@@ -231,7 +238,7 @@ function pruneSeenArticles() {
   }
 }
 
-async function pollForBreakingNews(sendNotificationCallback) {
+async function pollForBreakingNews(sendNotificationCallback, pool) {
   const pollStart = Date.now();
 
   const results = await Promise.all(LIVE_FEEDS.map(f => fetchFeedArticles(f)));
@@ -255,13 +262,57 @@ async function pollForBreakingNews(sendNotificationCallback) {
     article.title = await translateTitle(article.title, article.lang);
   }
 
+  // Get last 12 hours of alerts for dedup context
+  let recentAlertTitles = [];
+  if (pool) {
+    try {
+      const recent = await pool.query(
+        `SELECT title FROM live_alerts WHERE created_at > NOW() - INTERVAL '12 hours' ORDER BY created_at DESC`
+      );
+      recentAlertTitles = recent.rows.map(r => r.title);
+    } catch (err) {
+      console.error('[LivePoller] Failed to fetch recent alerts for dedup:', err.message);
+    }
+  }
+
+  // Get 24-hour push count from DB
+  let pushCount24h = 0;
+  if (pool) {
+    try {
+      const countResult = await pool.query(
+        `SELECT COUNT(*) as count FROM live_alerts WHERE push_sent = true AND created_at > NOW() - INTERVAL '24 hours'`
+      );
+      pushCount24h = parseInt(countResult.rows[0].count) || 0;
+    } catch (err) {
+      console.error('[LivePoller] Failed to fetch push count:', err.message);
+    }
+  }
+
+  console.log(`[LivePoller] 24h push count: ${pushCount24h}`);
+
   const alertEligible = newArticles.filter(a => !a.noAlerts);
   const briefingOnly = newArticles.filter(a => a.noAlerts);
-  const { tierA, tierB } = await assessBreakingNews(alertEligible);
+  const { tierA, tierB } = await assessBreakingNews(alertEligible, recentAlertTitles);
   const allTierB = [...tierB, ...briefingOnly];
+
+  // Save all Tier B stories to DB as feed-only (push_sent: false)
+  if (pool && allTierB.length > 0) {
+    for (const article of allTierB) {
+      try {
+        await pool.query(
+          `INSERT INTO live_alerts (title, source, url, push_sent) VALUES ($1, $2, $3, false) ON CONFLICT DO NOTHING`,
+          [article.title, article.source, article.url || '']
+        );
+      } catch (err) {
+        console.error('[LivePoller] Failed to save Tier B article:', err.message);
+      }
+    }
+  }
 
   if (tierA.length > 0) {
     console.log(`[LivePoller] ${tierA.length} TIER A alerts detected:`);
+    let pushesThisPoll = 0;
+    const outletsPushedThisPoll = new Set();
     for (const article of tierA) {
       const status = article.verificationStatus;
       let prefix = 'Breaking';
@@ -270,9 +321,61 @@ async function pollForBreakingNews(sendNotificationCallback) {
       
       let body = `Via ${article.source}`;
       if (status === 'DEVELOPING') body = `Developing story. Via ${article.source}`;
-if (status === 'UNCONFIRMED') body = `Via ${article.source}`;
+      if (status === 'UNCONFIRMED') body = `Via ${article.source}`;
       
       console.log(`  - [${status}] ${article.source}: ${article.title}`);
+      if (pushCount24h >= 10) {
+        if (pool) {
+          try {
+            await pool.query(
+              `INSERT INTO live_alerts (title, source, url, push_sent) VALUES ($1, $2, $3, false) ON CONFLICT DO NOTHING`,
+              [article.title, article.source, article.url || '']
+            );
+          } catch (err) {
+            console.error('[LivePoller] Failed to save Tier A (ceiling):', err.message);
+          }
+        }
+        continue;
+      }
+      if (pushCount24h >= 8 && status !== 'CONFIRMED') {
+        if (pool) {
+          try {
+            await pool.query(
+              `INSERT INTO live_alerts (title, source, url, push_sent) VALUES ($1, $2, $3, false) ON CONFLICT DO NOTHING`,
+              [article.title, article.source, article.url || '']
+            );
+          } catch (err) {
+            console.error('[LivePoller] Failed to save Tier A (ceiling):', err.message);
+          }
+        }
+        continue;
+      }
+      if (pushesThisPoll >= 2) {
+        if (pool) {
+          try {
+            await pool.query(
+              `INSERT INTO live_alerts (title, source, url, push_sent) VALUES ($1, $2, $3, false) ON CONFLICT DO NOTHING`,
+              [article.title, article.source, article.url || '']
+            );
+          } catch (err) {
+            console.error('[LivePoller] Failed to save Tier A (ceiling):', err.message);
+          }
+        }
+        continue;
+      }
+      if (outletsPushedThisPoll.has(article.source)) {
+        if (pool) {
+          try {
+            await pool.query(
+              `INSERT INTO live_alerts (title, source, url, push_sent) VALUES ($1, $2, $3, false) ON CONFLICT DO NOTHING`,
+              [article.title, article.source, article.url || '']
+            );
+          } catch (err) {
+            console.error('[LivePoller] Failed to save Tier A (ceiling):', err.message);
+          }
+        }
+        continue;
+      }
       if (await isDuplicateEvent(article.title)) {
         console.log(`  - [SKIPPED - duplicate event] ${article.source}: ${article.title}`);
         continue;
@@ -285,6 +388,15 @@ if (status === 'UNCONFIRMED') body = `Via ${article.source}`;
           topic: 'middle-east-tensions',
           url: article.url || ''
         });
+        pushesThisPoll++;
+        pushCount24h++;
+        outletsPushedThisPoll.add(article.source);
+        if (pool) {
+          await pool.query(
+            `INSERT INTO live_alerts (title, source, url, push_sent) VALUES ($1, $2, $3, true)`,
+            [article.title, article.source, article.url || '']
+          );
+        }
       } catch (err) {
         console.error('[LivePoller] Failed to send notification:', err.message);
       }
@@ -327,12 +439,12 @@ async function startLivePoller(sendNotificationCallback, pool) {
   console.log(`[LivePoller] Starting (polling every ${POLL_INTERVAL_MS / 1000}s)`);
   isRunning = true;
 
-  pollForBreakingNews(sendNotificationCallback).catch(err => {
+  pollForBreakingNews(sendNotificationCallback, pool).catch(err => {
     console.error('[LivePoller] Initial poll error:', err.message);
   });
 
   pollInterval = setInterval(() => {
-    pollForBreakingNews(sendNotificationCallback).catch(err => {
+    pollForBreakingNews(sendNotificationCallback, pool).catch(err => {
       console.error('[LivePoller] Poll error:', err.message);
     });
   }, POLL_INTERVAL_MS);
